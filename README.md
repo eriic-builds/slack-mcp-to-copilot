@@ -2,6 +2,8 @@
 
 Connect Slack to Microsoft Copilot using [Slack's hosted MCP server](https://docs.slack.dev/ai/slack-mcp-server/#overview). No custom MCP server to build or host.
 
+Set up a **custom federated connector in the Microsoft 365 admin center**, under **Copilot > Connectors**. This is **not** a Power Platform custom connector or a Copilot Studio setup.
+
 A browser-based runbook for IT admins: follow the exact clicks, copy tenant-specific configuration, and verify that Copilot can retrieve and cite Slack messages.
 
 **[Open the interactive guide](https://eriic-builds.github.io/slack-to-copilot/)**
