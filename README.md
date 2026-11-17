@@ -8,7 +8,7 @@ For full prerequisites and configuration details, see [Microsoft's custom federa
 
 A browser-based runbook for IT admins: follow the exact clicks, copy tenant-specific configuration, and verify that Copilot can retrieve and cite Slack messages.
 
-**[Open the interactive guide](https://eriic-builds.github.io/slack-to-copilot/)**
+**[Open the interactive guide](https://eriic-builds.github.io/slack-mcp-to-copilot/)**
 
 ## From setup to a cited answer
 
