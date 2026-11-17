@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A local, personalized field guide for evaluating Slack's hosted MCP server with a Microsoft Copilot custom federated connector.">
+<title>Slack to Copilot | MCP Setup Guide</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme = param === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 15px/1.6 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+a { color: var(--cp-link); text-underline-offset: 3px; overflow-wrap: anywhere; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; border: 1px solid var(--cp-border-strong); border-radius: .625rem; padding: .5rem .85rem; background: var(--cp-surface); color: var(--cp-text); }
+button:hover { background: var(--cp-surface-soft); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 600; }
+button.primary:hover { background: var(--cp-accent-hover); }
+:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 3px; }
+input, select, textarea { width: 100%; padding: .6rem .7rem; border: 1px solid var(--cp-border-strong); border-radius: .625rem; background: var(--cp-surface); color: var(--cp-text); }
+textarea { resize: vertical; min-height: 5.5rem; }
+input[aria-invalid="true"] { border: 2px solid var(--cp-danger); }
+code, .mono { font-family: Consolas, "Courier New", Courier, monospace; overflow-wrap: anywhere; font-size: .9em; }
+code { background: var(--cp-surface-soft); padding: .12rem .3rem; border-radius: 4px; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { font-size: clamp(2rem, 3.2vw, 3.25rem); line-height: 1.12; letter-spacing: -.035em; margin-bottom: 1rem; max-width: 22ch; }
+h2 { font-size: 1.45rem; line-height: 1.3; letter-spacing: -.02em; margin-bottom: .65rem; }
+h3 { font-size: 1.05rem; margin-bottom: .5rem; }
+p { margin-bottom: .85rem; }
+small, .muted, .hint { color: var(--cp-text-muted); }
+.hint { font-size: .82rem; margin: .25rem 0 0; }
+.eyebrow { color: var(--cp-accent); font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; margin-bottom: .65rem; }
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .8rem 2rem; background: var(--cp-bg-elevated); border-bottom: 1px solid var(--cp-border); }
+.brand { font-weight: 650; letter-spacing: -.02em; }
+.brand span { color: var(--cp-text-muted); font-weight: 400; margin-left: .5rem; }
+.actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 2.5rem; max-width: 1520px; margin: auto; padding: 2rem; align-items: start; }
+.rail { position: sticky; top: 5.5rem; max-height: calc(100vh - 7rem); overflow: auto; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); }
+.rail-header { padding: 1.25rem 1.25rem .25rem; }
+.rail-header h2 { font-size: 1.2rem; }
+.field-group { padding: .65rem 1.25rem 1rem; border-bottom: 1px solid var(--cp-border); }
+.field-group summary { font-weight: 650; padding: .25rem 0 .5rem; cursor: pointer; }
+.field { margin: .65rem 0 1rem; }
+.field:last-child { margin-bottom: .25rem; }
+.field label { display: block; font-size: .86rem; font-weight: 600; margin-bottom: .3rem; }
+.field .error { display: block; font-size: .78rem; color: var(--cp-danger); margin-top: .2rem; }
+.rail-footer { padding: 1rem 1.25rem; }
+.rail-footer button { margin: 0 .3rem .5rem 0; font-size: .82rem; }
+main { min-width: 0; }
+.hero { padding: 1rem 0 .5rem; }
+.lede { max-width: 72ch; color: var(--cp-text-muted); font-size: 1.05rem; }
+.badges { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.badge { display: inline-flex; align-items: center; border: 1px solid var(--cp-border); background: var(--cp-surface); border-radius: 999px; padding: .2rem .65rem; font-size: .76rem; font-weight: 600; }
+.badge.accent { color: var(--cp-accent); background: var(--cp-accent-soft); border-color: var(--cp-accent); }
+.summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin: 1.25rem 0; }
+.metric { padding: 1rem; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); }
+.metric strong { font-size: 1.1rem; display: block; }
+.metric span { font-size: .78rem; color: var(--cp-text-muted); }
+.progress-track { height: 6px; background: var(--cp-border); border-radius: 999px; overflow: hidden; margin-top: .65rem; }
+.progress-fill { height: 100%; background: var(--cp-accent); width: 0; }
+.notice { border-left: 3px solid var(--cp-warning); background: var(--cp-surface); padding: .85rem 1rem; border-radius: 0 .625rem .625rem 0; margin: 1rem 0; font-size: .9rem; }
+.notice.info { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+.notice.danger { border-color: var(--cp-danger); }
+.notice p:last-child { margin-bottom: 0; }
+.flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: .6rem; margin: 1rem 0 1.5rem; }
+.flow div { border: 1px solid var(--cp-border); background: var(--cp-surface); border-radius: .625rem; padding: .8rem; text-align: center; font-weight: 600; }
+.flow small { display: block; font-weight: 400; font-size: .76rem; }
+.flow > span { color: var(--cp-accent); font-weight: bold; }
+.jump-nav { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1.25rem 0 2rem; }
+.jump-nav a { padding: .4rem .65rem; font-size: .8rem; text-decoration: none; color: var(--cp-text); border: 1px solid var(--cp-border); border-radius: .625rem; background: var(--cp-surface); }
+.jump-nav a:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+.step { padding: 1.5rem; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; margin-bottom: 1.25rem; }
+.step-head { display: flex; align-items: flex-start; gap: .9rem; margin-bottom: .8rem; }
+.step-number { flex: 0 0 2.3rem; height: 2.3rem; display: grid; place-items: center; border-radius: .625rem; color: var(--cp-accent); background: var(--cp-accent-soft); font-weight: 700; }
+.step-head .tag { color: var(--cp-text-muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
+.step-head h2 { margin: .15rem 0 0; }
+ol { padding-left: 1.35rem; }
+li { padding-left: .2rem; margin-bottom: .6rem; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; margin: .85rem 0 1rem; text-align: left; font-size: .88rem; }
+th { color: var(--cp-text-muted); font-weight: 600; font-size: .76rem; text-transform: uppercase; letter-spacing: .05em; }
+th, td { padding: .7rem .6rem; border-bottom: 1px solid var(--cp-border); vertical-align: top; }
+td:first-child { width: 29%; font-weight: 600; }
+td:last-child { width: 4rem; }
+td code { background: none; padding: 0; }
+.copy { padding: .22rem .5rem; font-size: .76rem; }
+.value-box { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; padding: .9rem 1rem; border: 1px solid var(--cp-border); background: var(--cp-surface-soft); border-radius: .625rem; margin: .65rem 0 1rem; }
+.value-box .mono { white-space: pre-wrap; }
+.checks { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--cp-border); }
+.check { display: flex; gap: .65rem; align-items: flex-start; font-size: .87rem; margin: .6rem 0; cursor: pointer; }
+.check input { width: 1rem; height: 1rem; flex: 0 0 1rem; margin-top: .3rem; accent-color: var(--cp-accent); }
+.check:has(input:checked) { color: var(--cp-text-muted); }
+.step details { border: 1px solid var(--cp-border); border-radius: .625rem; padding: .7rem .9rem; margin: .75rem 0; }
+.step details summary { cursor: pointer; font-weight: 600; }
+.step details[open] summary { margin-bottom: .7rem; }
+.environment { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem 1.5rem; padding: 1rem; background: var(--cp-surface-soft); border-radius: .625rem; margin: 1rem 0; }
+.environment span { display: block; color: var(--cp-text-muted); font-size: .75rem; }
+.environment strong { font-size: .88rem; overflow-wrap: anywhere; }
+.result { min-width: 9.5rem; font-size: .8rem; }
+.result[data-state="passed"] { border-color: var(--cp-success); }
+.result[data-state="failed"] { border-color: var(--cp-danger); }
+.test-table td:first-child { width: 20%; }
+.test-table td:last-child { width: 10rem; }
+.link-list { padding-left: 1.2rem; }
+.link-list li { margin-bottom: .75rem; }
+.link-list small { display: block; }
+footer { color: var(--cp-text-muted); font-size: .78rem; padding: 1rem 0 2rem; }
+#status { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 40; background: var(--cp-surface); color: var(--cp-text); border: 1px solid var(--cp-border-strong); border-radius: .625rem; padding: .65rem 1rem; box-shadow: var(--cp-shadow); max-width: min(90vw, 52rem); }
+#status:empty { display: none; }
+#copy-dialog { max-width: min(42rem, 90vw); width: 42rem; background: var(--cp-surface); color: var(--cp-text); border: 1px solid var(--cp-border-strong); border-radius: 16px; padding: 1.5rem; }
+#copy-dialog::backdrop { background: var(--cp-overlay); }
+#copy-buffer { min-height: 8rem; margin-bottom: .75rem; }
+#reset-panel { margin-top: .65rem; border-left: 3px solid var(--cp-danger); padding-left: .75rem; }
+[hidden] { display: none !important; }
+.skip-link { position: absolute; left: -10000px; }
+.skip-link:focus { left: 1rem; top: 1rem; background: var(--cp-surface); z-index: 100; padding: 1rem; }
+@media (max-width: 1100px) { .layout { grid-template-columns: 285px minmax(0, 1fr); gap: 1.25rem; padding: 1.25rem; } .topbar { padding: .8rem 1.25rem; } .summary-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .topbar { position: static; align-items: flex-start; flex-direction: column; } .brand span { display: none; } .layout { display: block; padding: 1rem; } .rail { position: static; max-height: none; margin-bottom: 1.5rem; } .hero { padding-top: .5rem; } .step { padding: 1rem; } .flow { gap: .25rem; } .flow div { padding: .6rem .3rem; font-size: .8rem; } .flow small { font-size: .65rem; } .environment { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media print {
+  html { color-scheme: light; scroll-behavior: auto; }
+  body { background: var(--cp-surface); font-size: 10pt; }
+  .topbar, .rail, .jump-nav, .copy, .actions, #status, #copy-dialog, .skip-link { display: none !important; }
+  .layout { display: block; max-width: none; margin: 0; padding: 0; }
+  .hero { padding: 0; } h1 { font-size: 27pt; max-width: none; }
+  .step { border-radius: 0; padding: 12pt; margin-bottom: 12pt; break-inside: auto; }
+  .step-head, h2, h3, .value-box, .check, .metric, .notice { break-inside: avoid; }
+  h2, h3, .step-head { break-after: avoid; }
+  .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .table-wrap { overflow: visible; } table { font-size: 9pt; } tr { break-inside: avoid; }
+  .result { border: 0; padding: 0; min-width: 0; }
+  a { color: var(--cp-text); } footer { padding-bottom: 0; }
+}
+</style>
+<style id="presentation-design">
+:root {
+  --cp-bg: #e4e9e5;
+  --cp-bg-elevated: #e9eee9;
+  --cp-surface: #edf0ea;
+  --cp-surface-soft: #d6dfd7;
+  --cp-border: #adbcb0;
+  --cp-border-strong: #748378;
+  --cp-text: #25342d;
+  --cp-text-muted: #4b5c53;
+  --cp-text-soft: #506158;
+  --cp-accent: #344e46;
+  --cp-accent-hover: #283f38;
+  --cp-accent-soft: #ccdedc;
+  --cp-accent-fg: #f3f5ef;
+  --cp-link: #285763;
+  --cp-highlight: #bbd4d2;
+  --cp-cloud: #ccdedc;
+  --cp-cloud-strong: #b8cfce;
+  --cp-cover-ink: #253b36;
+  --cp-cover-muted: #405b53;
+  --cp-cover-paper: #d6e1de;
+  --cp-cover-sage: #e0e7dc;
+  --cp-cover-blue: #b8cfce;
+  --cp-cover-hover: #1e332d;
+  --cp-cover-art-opacity: .22;
+  --cp-image-paper: #ffffff;
+  --cp-success: #285e3f;
+  --cp-danger: #9c343b;
+  --cp-warning: #805500;
+  --cp-clear: transparent;
+  --cp-error-soft: #ead9d4;
+  --cp-shadow: 0 12px 32px rgba(26, 26, 26, .12);
+  --cp-heading-font: "Segoe Sans Display", "Segoe UI Variable Display", "Segoe UI", Aptos, Calibri, sans-serif;
+  --cp-serif-font: "Segoe Serif Display", Georgia, "Times New Roman", serif;
+}
+html[data-theme="dark"] {
+  --cp-bg: #3f494d;
+  --cp-bg-elevated: #454f53;
+  --cp-surface: #4b565a;
+  --cp-surface-soft: #566267;
+  --cp-border: #7e8d90;
+  --cp-border-strong: #b2bfc0;
+  --cp-text: #eff2ed;
+  --cp-text-muted: #d5ded8;
+  --cp-text-soft: #dbe2da;
+  --cp-accent: #c6e1de;
+  --cp-accent-hover: #d9eae5;
+  --cp-accent-soft: #526669;
+  --cp-accent-fg: #293c3d;
+  --cp-link: #d2edf2;
+  --cp-highlight: #61787a;
+  --cp-cloud: #526669;
+  --cp-cloud-strong: #657f80;
+  --cp-cover-ink: #eff2ed;
+  --cp-cover-muted: #d5ded8;
+  --cp-cover-paper: #4b5b5e;
+  --cp-cover-sage: #526266;
+  --cp-cover-blue: #657f80;
+  --cp-cover-hover: #d9eae5;
+  --cp-cover-art-opacity: .045;
+  --cp-success: #c1edc3;
+  --cp-danger: #ffd0cd;
+  --cp-warning: #ffe0aa;
+  --cp-error-soft: #665354;
+}
+html { scroll-padding-top: 6rem; }
+body { font-size: 16px; line-height: 1.65; }
+::selection { color: var(--cp-text); background: var(--cp-highlight); }
+* { scrollbar-width: thin; scrollbar-color: var(--cp-border-strong) var(--cp-bg); }
+input, textarea { caret-color: var(--cp-accent); }
+a { text-decoration-thickness: 1px; text-underline-offset: .2em; }
+button { min-height: 42px; padding: .55rem 1rem; border-radius: .625rem; font-size: .85rem; font-weight: 600; transition: background-color 140ms ease-out, border-color 140ms ease-out; }
+button:disabled { opacity: 1; background: var(--cp-surface-soft); color: var(--cp-text-muted); border-color: var(--cp-border); }
+button.primary { padding-inline: 1.15rem; }
+:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 4px; }
+input, select, textarea { min-height: 46px; border-color: var(--cp-border-strong); border-radius: .625rem; padding: .65rem .8rem; font-size: .94rem; }
+input::placeholder, textarea::placeholder { opacity: 1; color: var(--cp-text-muted); }
+h1, h2, h3 { font-family: var(--cp-heading-font); text-wrap: balance; }
+h1 { max-width: 13ch; font-size: clamp(2.8rem, 4.65vw, 4.5rem); font-weight: 400; line-height: 1.04; letter-spacing: -.035em; margin: 0 0 1.5rem; }
+h1 em { font-family: var(--cp-serif-font); font-weight: 400; font-style: normal; }
+h2 { font-size: clamp(1.6rem, 2.1vw, 2rem); font-weight: 500; letter-spacing: -.025em; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+p { margin-bottom: 1rem; }
+.eyebrow { display: none; }
+.topbar { min-height: 76px; padding: .85rem max(2rem, calc((100vw - 1400px) / 2)); background: var(--cp-bg); }
+.brand { display: flex; align-items: center; gap: .8rem; font-size: 1.1rem; letter-spacing: -.035em; white-space: nowrap; }
+.brand svg { width: 31px; height: 31px; color: var(--cp-text); flex: 0 0 auto; }
+.brand span { display: block; font-size: .76rem; margin: -.1rem 0 0; letter-spacing: 0; white-space: normal; line-height: 1.4; }
+.brand, .brand > div { min-width: 0; }
+.actions { align-items: center; }
+#theme-button { display: inline-flex; align-items: center; justify-content: center; padding: .55rem .7rem; }
+#theme-button svg { width: 18px; height: 18px; }
+.hero { position: relative; isolation: isolate; overflow: hidden; max-width: 1480px; margin: 0 auto; padding: clamp(2rem, 4.3vw, 4.5rem) clamp(1.5rem, 4.7vw, 5rem); display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); gap: 2rem; align-items: center; min-height: 440px; border-radius: 0 0 24px 24px; color: var(--cp-cover-ink); background: var(--cp-cover-paper); --cp-accent: var(--cp-cover-ink); --cp-accent-hover: var(--cp-cover-hover); --cp-accent-fg: var(--cp-cover-paper); --cp-surface-soft: var(--cp-cover-sage); --cp-cloud-strong: var(--cp-cover-blue); }
+.hero::before { content: ""; position: absolute; z-index: -1; inset: 0; background: var(--cp-cloud); }
+.cover-copy { max-width: 680px; }
+.cover-copy h1 { max-width: 20ch; font-size: clamp(2.8rem, 4.4vw, 4.25rem); }
+.cover-copy .lede { max-width: 47ch; color: var(--cp-cover-muted); font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.6rem; }
+.cover-actions { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.cover-actions a { color: var(--cp-cover-ink); font-size: .9rem; font-weight: 600; }
+.cover-meta { color: var(--cp-cover-muted); font-size: .78rem; margin: 1.5rem 0 0; }
+.hero .primary:focus-visible { outline-color: var(--cp-cover-ink); }
+.connection-map { position: relative; min-height: 300px; margin: 0; padding: 1rem 0 1rem 2rem; }
+.connection-map::before, .connection-map::after { content: ""; position: absolute; width: 164px; height: 180px; border-radius: 24px; transform: skewY(-8deg); z-index: -1; }
+.connection-map::before { background: var(--cp-cover-paper); opacity: .8; top: 0; right: 12px; }
+.connection-map::after { background: var(--cp-cloud-strong); bottom: 10px; left: 20px; }
+.map-node { display: flex; gap: 1rem; align-items: center; width: min(100%, 340px); margin: 0 0 1rem; border: 1px solid var(--cp-cover-ink); background: var(--cp-cover-paper); padding: 1.1rem 1.3rem; border-radius: 12px; color: var(--cp-cover-ink); }
+.map-node:nth-child(2) { margin-left: 1.5rem; background: var(--cp-surface-soft); }
+.map-node:nth-child(3) { margin-left: 3rem; }
+.map-node svg { flex: 0 0 24px; width: 24px; height: 24px; }
+.map-node strong { display: block; font-size: 1.05rem; font-weight: 600; }
+.map-node small { display: block; color: var(--cp-cover-muted); font-size: .78rem; }
+.map-node p { margin: 0; }
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: clamp(2rem, 5vw, 5.5rem); max-width: 1380px; margin: auto; padding: 3rem 2rem 1rem; }
+.toc { position: sticky; top: 7rem; max-height: calc(100vh - 8rem); overflow: auto; padding-right: .25rem; }
+.toc-heading { font-size: .82rem; font-weight: 600; margin-bottom: .85rem; color: var(--cp-text-muted); }
+.jump-nav { display: flex; flex-direction: column; flex-wrap: nowrap; margin: 0 0 1.7rem; gap: 0; }
+.jump-nav a { display: flex; align-items: baseline; gap: .8rem; border: 0; border-radius: .625rem; padding: .6rem .65rem; background: none; font-size: .9rem; min-height: 44px; }
+.jump-nav a span { color: var(--cp-text-muted); font-size: .77rem; font-variant-numeric: tabular-nums; min-width: 1.2rem; }
+.jump-nav a:hover { background: var(--cp-surface-soft); color: var(--cp-text); }
+.jump-nav a[aria-current="location"] { background: var(--cp-accent-soft); color: var(--cp-text); font-weight: 600; }
+.journey-status { padding: 1.1rem .65rem; border-top: 1px solid var(--cp-border); font-size: .8rem; }
+.journey-status strong { font-size: .9rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.journey-status > p { margin: .35rem 0 0; color: var(--cp-text-muted); }
+.progress-track { height: 3px; margin-top: .8rem; background: var(--cp-border); }
+.journey-status details { margin-top: 1.2rem; }
+.journey-status summary { cursor: pointer; font-size: .8rem; }
+.journey-status #test-label { font-size: .8rem; }
+#test-caption { color: var(--cp-text-muted); margin: .5rem 0 0; }
+.rail { position: static; max-height: none; overflow: visible; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); margin: 0 0 1.25rem; }
+.rail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; cursor: pointer; padding: 1.4rem 1.5rem; list-style: none; background: var(--cp-surface-soft); border-radius: 16px; }
+.rail-header::-webkit-details-marker { display: none; }
+.rail-header h2 { font-size: 1.3rem; margin: 0 0 .2rem; font-weight: 600; }
+.rail-header .hint { margin: 0; font-size: .83rem; max-width: 68ch; }
+.rail-header svg { width: 22px; height: 22px; flex: 0 0 22px; margin-top: .4rem; transition: transform 160ms ease-out; }
+.rail[open] > summary { border-radius: 16px 16px 0 0; }
+.rail[open] > summary svg { transform: rotate(180deg); }
+#profile-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: .2rem .7rem .75rem; align-items: start; }
+.field-group { padding: 1.1rem .8rem; border-bottom: 1px solid var(--cp-border); }
+.field-group summary { font-size: .94rem; }
+.field { margin: .9rem 0 1.1rem; }
+.field label { font-size: .82rem; }
+.field .error { font-size: .8rem; }
+.rail-footer { border-top: 1px solid var(--cp-border); padding: 1rem 1.5rem; }
+.rail-footer .hint { max-width: none; }
+.rail-footer button { min-height: 40px; margin-bottom: .7rem; }
+.hint { color: var(--cp-text-muted); font-size: .82rem; }
+.environment { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; background: none; border: 0; padding: .25rem 0 1.8rem; margin: 0; border-bottom: 1px solid var(--cp-border); border-radius: 0; }
+.environment span { font-size: .73rem; }
+.environment strong { font-weight: 500; font-size: .84rem; line-height: 1.4; display: block; margin-top: .25rem; }
+.lab-note { margin: 1.5rem 0 2.5rem; font-size: .88rem; }
+.lab-note summary { cursor: pointer; color: var(--cp-text-muted); }
+.lab-note p { max-width: 75ch; padding-top: .9rem; }
+.step { padding: 2.5rem 0 2.75rem; border: 0; border-bottom: 1px solid var(--cp-border); border-radius: 0; margin: 0; background: none; scroll-margin-top: 1rem; }
+.step-head { gap: 1.1rem; margin-bottom: 1.4rem; align-items: baseline; }
+.step-number { background: none; padding: 0; flex: 0 0 2.6rem; height: auto; border-radius: 0; display: block; font-family: var(--cp-serif-font); font-size: 2.3rem; line-height: 1; font-weight: 400; color: var(--cp-text); }
+.step-head > div:last-child { display: flex; flex-direction: column; }
+.step-head .tag { order: 1; margin-top: .4rem; text-transform: none; letter-spacing: 0; font-size: .79rem; }
+.step-head h2 { line-height: 1.2; }
+.step > p, .step > ol { max-width: 75ch; }
+.step > h3 { margin-top: 2rem; }
+li { margin-bottom: .85rem; }
+.notice { border: 1px solid var(--cp-border); border-radius: 12px; background: var(--cp-surface-soft); padding: 1.1rem 1.25rem; margin: 1.25rem 0; font-size: .91rem; }
+.notice.info { border-color: var(--cp-border); background: var(--cp-accent-soft); }
+.notice.danger { border-color: var(--cp-danger); background: var(--cp-error-soft); }
+.value-box { border: 1px solid var(--cp-border); border-radius: 12px; background: var(--cp-surface-soft); padding: 1.1rem 1.25rem; gap: 1rem; margin: 1rem 0 1.5rem; align-items: center; }
+.value-box .mono { min-width: 0; font-size: .86rem; }
+code { background: var(--cp-surface-soft); border-radius: 3px; }
+.copy { min-height: 36px; min-width: 54px; padding: .35rem .6rem; font-size: .76rem; flex: 0 0 auto; background: var(--cp-surface); }
+.table-wrap { margin-block: 1.2rem; border: 1px solid var(--cp-border); border-radius: 12px; }
+table { margin: 0; font-size: .88rem; }
+th { background: var(--cp-surface-soft); font-size: .73rem; text-transform: none; letter-spacing: 0; }
+th, td { padding: 1rem; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; }
+td code { font-size: .86rem; }
+.checks { margin-top: 1.6rem; padding: 1rem 1.25rem; border: 0; border-radius: 12px; background: var(--cp-surface-soft); }
+.check { font-size: .87rem; margin: .5rem 0; gap: .8rem; }
+.check input { min-height: 0; margin-top: .36rem; }
+.step details { border: 0; border-bottom: 1px solid var(--cp-border); border-radius: 0; padding: 1.1rem 0; margin: 0; }
+.step details summary { min-height: 28px; font-size: .94rem; }
+.step details[open] { padding-bottom: 1.5rem; }
+.step details[open] summary { margin-bottom: .9rem; }
+.step details p { font-size: .92rem; max-width: 75ch; }
+#step-8 details { padding-block: 1.3rem; }
+#references { border-bottom: 0; }
+#references > h2 { margin-bottom: 1.5rem; }
+.link-list li { padding-bottom: .6rem; }
+.link-list small { font-size: .8rem; }
+.result { min-width: 9.5rem; font-size: .83rem; }
+footer { margin-top: 1.5rem; padding: 1.5rem 0 2rem; border-top: 1px solid var(--cp-border); font-size: .78rem; }
+#status { border-radius: 12px; font-size: .88rem; }
+#copy-dialog { border-radius: 16px; }
+#reset-panel { border: 1px solid var(--cp-danger); border-radius: .625rem; padding: .75rem; }
+@keyframes reveal-cover { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+.hero::before { animation: reveal-cover 600ms cubic-bezier(.16, 1, .3, 1) both; }
+@media (min-width: 1480px) { .hero { margin-top: 1rem; border-radius: 24px; } }
+@media (max-width: 1100px) { .topbar { padding: .8rem 1.5rem; }.layout { grid-template-columns: 185px minmax(0, 1fr); gap: 2rem; padding: 2rem 1.5rem; }.hero { gap: 1rem; padding: 2.7rem 2rem; min-height: 400px; }.map-node { max-width: calc(100% - 2rem); padding: 1rem; }.map-node:nth-child(2) { margin-left: .75rem; }.map-node:nth-child(3) { margin-left: 1.5rem; }.environment { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 850px) { .layout { grid-template-columns: 1fr; }.toc { position: static; max-height: none; overflow: visible; padding: 0 0 1rem; border-bottom: 1px solid var(--cp-border); }.toc-heading { margin-bottom: .35rem; }.jump-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: .75rem; }.jump-nav a { font-size: .8rem; padding: .45rem .4rem; gap: .5rem; }.journey-status { padding: .5rem .4rem 0; border: 0; }.journey-status > p { display: none; }.journey-status details { display: none; }.hero { grid-template-columns: 1.2fr 1fr; }.connection-map { padding-left: 0; }.map-node strong { font-size: .9rem; }.map-node small { font-size: .72rem; }.map-node { gap: .65rem; } }
+@media (max-width: 640px) { .topbar { position: static; flex-direction: column; gap: .85rem; align-items: stretch; padding: 1rem; }.brand { font-size: 1rem; }.brand span { display: block; }.actions { flex-wrap: nowrap; }.actions button { font-size: .78rem; padding: .5rem .7rem; }.actions .primary { flex: 1; }.hero { grid-template-columns: 1fr; min-height: 0; padding: 2rem 1.25rem 1.25rem; border-radius: 0; gap: 1.4rem; }.hero h1 { font-size: clamp(2.7rem, 9.5vw, 3.8rem); max-width: 15ch; }.cover-copy .lede { font-size: .98rem; }.cover-actions { gap: 1rem; }.connection-map { display: flex; gap: .5rem; min-height: 0; padding: 0; align-items: stretch; margin: .5rem 0; }.connection-map::before, .connection-map::after { display: none; }.map-node, .map-node:nth-child(2), .map-node:nth-child(3) { margin: 0; max-width: none; width: 33.333%; padding: .8rem .6rem; display: block; }.map-node svg { width: 20px; height: 20px; margin-bottom: .4rem; }.map-node strong { font-size: .78rem; line-height: 1.4; }.map-node small { display: none; }.layout { display: block; padding: 1.5rem 1rem; }.toc { margin-bottom: 1.5rem; }.jump-nav { grid-template-columns: 1fr 1fr; }.rail-header { padding: 1rem; }.rail-header h2 { font-size: 1.1rem; }#profile-fields { grid-template-columns: 1fr; padding-inline: .25rem; }.rail-footer { padding: 1rem; }.environment { gap: 1.1rem; padding-bottom: 1.5rem; }.environment strong { font-size: .8rem; }.step { padding: 2rem 0; }.step-head { gap: .8rem; }.step-number { font-size: 2rem; flex-basis: 2rem; }.step-head h2 { font-size: 1.55rem; }.step-head .tag { font-size: .75rem; }.notice, .value-box, .checks { padding: 1rem; }.table-wrap { border-radius: 8px; }th, td { padding: .8rem .65rem; }table { font-size: .8rem; }td:first-child { width: 26%; }.copy { min-height: 40px; min-width: 48px; }.test-table { min-width: 610px; }.value-box { align-items: flex-start; }.lab-note { margin-block: 1.3rem 1.5rem; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
+@media print {
+  .topbar, .toc, .rail, .cover-actions, .copy, #status, #copy-dialog { display: none !important; }
+  .hero { display: block; max-width: none; min-height: 0; margin: 0; border-radius: 0; padding: 0 0 20pt; break-after: avoid; }
+  .hero::before, .connection-map, .cover-meta { display: none; }
+  .cover-copy { max-width: none; }.hero h1 { font-size: 30pt; max-width: none; }.hero .lede { max-width: none; font-size: 10pt; }
+  .layout { display: block; max-width: none; padding: 0; }.environment { grid-template-columns: repeat(4, 1fr); font-size: 8pt; padding-bottom: 10pt; }.environment strong { font-size: 8pt; }
+  .step { padding: 18pt 0; margin: 0; }.step-number { font-size: 22pt; }.step-head h2 { font-size: 19pt; }.step-head .tag { font-size: 8pt; }
+  .step details { padding-block: 8pt; }.step details p, .notice { font-size: 9pt; }.table-wrap { overflow: visible; border-radius: 0; }.test-table { min-width: 0; }th, td { padding: 7pt; }.result { min-height: 0; min-width: 0; }.checks { padding: 8pt; }.lab-note { margin-block: 8pt 14pt; }
+}
+</style>
+<style id="admin-runbook-design">
+.run-toolbar, .run-save-note, .task-launch, .task-dock, .task-exit { display: none; }
+.nav-title { display: block; min-width: 0 !important; color: var(--cp-text) !important; font-size: .88rem !important; }
+.nav-title small { display: block; font-size: .72rem; color: var(--cp-text-muted); font-weight: 400; }
+.jump-nav a[data-state="complete"] .nav-title small { color: var(--cp-success); }
+.jump-nav a[data-state="blocked"] .nav-title small { color: var(--cp-danger); }
+body[data-run-mode] .run-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; padding: 0 0 .75rem; }
+body[data-run-mode] .run-save-note { display: block; font-size: .76rem; color: var(--cp-text-muted); margin: 0 0 1.5rem; max-width: 100ch; }
+.mode-switch { display: flex; padding: 3px; border: 1px solid var(--cp-border); border-radius: .625rem; background: var(--cp-surface-soft); }
+.mode-switch button { background: none; border: 0; min-height: 36px; font-size: .8rem; font-weight: 500; padding: .35rem .8rem; }
+.mode-switch button[aria-pressed="true"] { background: var(--cp-surface); color: var(--cp-text); box-shadow: 0 1px 2px var(--cp-border); font-weight: 650; }
+.run-toolbar-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+.run-toolbar-actions button { min-height: 36px; font-size: .77rem; padding: .35rem .65rem; }
+body[data-run-mode="guided"] .hero { display: block; min-height: 0; padding: 1.5rem max(2rem, calc((100vw - 1400px) / 2)); max-width: none; margin: 0; border-radius: 0; }
+body[data-run-mode="guided"] .hero::before { animation: none; }
+body[data-run-mode="guided"] .cover-copy { max-width: none; }
+body[data-run-mode="guided"] .hero h1 { font-size: 2rem; max-width: none; margin-bottom: .6rem; letter-spacing: -.025em; }
+body[data-run-mode="guided"] .hero h1 br { display: none; }
+body[data-run-mode="guided"] .hero h1 em::before { content: " "; }
+body[data-run-mode="guided"] .cover-copy .lede { max-width: 85ch; font-size: .92rem; margin-bottom: 1rem; }
+body[data-run-mode="guided"] .cover-actions { display: inline-flex; gap: 1.2rem; }
+body[data-run-mode="guided"] .cover-actions button { min-height: 36px; padding: .4rem .8rem; font-size: .8rem; }
+body[data-run-mode="guided"] .cover-actions a { font-size: .82rem; }
+body[data-run-mode="guided"] .cover-meta { display: inline-block; margin: 0 0 0 1.5rem; font-size: .75rem; }
+body[data-run-mode="guided"] .connection-map { display: none; }
+body[data-run-mode="guided"] .layout { max-width: 1580px; grid-template-columns: 220px minmax(0, 1fr); gap: 2rem; padding-top: 1.75rem; }
+body[data-run-mode="guided"] .environment { padding-bottom: 1rem; }
+body[data-run-mode="guided"] .lab-note { margin: .8rem 0 1.25rem; font-size: .8rem; }
+body[data-run-mode="guided"] .task-launch { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1rem; background: var(--cp-surface-soft); border: 1px solid var(--cp-border); border-radius: .625rem; margin-bottom: 1.5rem; }
+.task-role { font-size: .78rem; font-weight: 650; }
+.task-launch p { font-size: .78rem; color: var(--cp-text-muted); margin: .15rem 0 0; }
+.task-launch-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; }
+.task-launch-actions button { min-height: 38px; font-size: .8rem; padding: .35rem .7rem; }
+@media (max-width: 700px) { .task-launch-actions { flex: 0 0 46%; }.task-launch-actions > * { width: 100%; } }
+.portal-link { display: inline-flex; align-items: center; min-height: 38px; border: 1px solid var(--cp-border-strong); border-radius: .625rem; padding: .35rem .75rem; font-size: .8rem; font-weight: 600; white-space: nowrap; text-decoration: none; color: var(--cp-text); background: var(--cp-surface); }
+.portal-link:hover { background: var(--cp-accent-soft); }
+body[data-run-mode="guided"] .run-workarea { display: grid; grid-template-columns: minmax(0, 1fr) 285px; gap: 1.75rem; align-items: start; }
+.task-document { min-width: 0; }
+body[data-run-mode="guided"] .task-dock { display: block; position: sticky; top: 6rem; max-height: calc(100vh - 7rem); overflow: auto; padding: 1rem; background: var(--cp-surface-soft); border: 1px solid var(--cp-border); border-radius: 12px; }
+.task-dock h3 { font-family: inherit; font-size: .9rem; margin-bottom: .35rem; }
+.task-dock .hint { font-size: .75rem; line-height: 1.5; }
+.task-dock .field { margin: 1.05rem 0; }
+.task-dock .field label { font-size: .78rem; }
+.task-dock input, .task-dock select, .task-dock textarea { font-size: .83rem; min-height: 42px; background: var(--cp-surface); }
+.task-dock .field .hint { font-size: .73rem; }
+body[data-run-mode="guided"] .step.is-task-hidden { display: none; }
+body[data-run-mode="guided"] .step { padding: .3rem 0 1rem; border: 0; }
+body[data-run-mode="guided"] .step-head { margin-bottom: 1.4rem; }
+body[data-run-mode="guided"] .step-head h2 { font-size: 1.7rem; }
+body[data-run-mode="guided"] .step-number { font-size: 2rem; flex-basis: 2.2rem; }
+.task-actions { display: none; }
+body[data-run-mode="guided"] .task-actions { display: block; font-size: .95rem; line-height: 1.65; }
+.task-actions ol { padding-left: 1.3rem; margin: 0 0 1.25rem; }
+.task-actions li { margin-bottom: .9rem; }
+body[data-run-mode="guided"] .task-detail { padding-bottom: .8rem; margin: .75rem 0; border: 1px solid var(--cp-border); border-radius: .625rem; }
+body[data-run-mode="guided"] .task-detail > summary { font-size: .82rem; padding: .1rem 1rem; }
+body[data-run-mode="guided"] .task-detail[open] { padding: 1rem; }
+body[data-run-mode="guided"] .task-detail[open] > summary { padding-inline: 0; }
+body[data-run-mode="reference"] .task-detail { border: 0; padding: 0; }
+body[data-run-mode="reference"] .task-detail > summary { display: none; }
+body[data-run-mode="guided"] .checks { margin-top: 1.2rem; padding: 1rem; }
+body[data-run-mode="guided"] .checks::before { content: "Confirm what you observed"; display: block; margin-bottom: .6rem; font-size: .78rem; font-weight: 650; }
+body[data-run-mode="guided"] .table-wrap { margin-block: 1rem; }
+body[data-run-mode="guided"] th, body[data-run-mode="guided"] td { padding: .8rem .7rem; }
+body[data-run-mode="guided"] table { font-size: .83rem; }
+body[data-run-mode="guided"] .notice { padding: .85rem 1rem; font-size: .84rem; }
+body[data-run-mode="guided"] .task-exit { display: block; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--cp-border); }
+.expected-result { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 1rem; font-size: .83rem; }
+.expected-result strong { font-size: .78rem; }
+.expected-result p { margin: 0; max-width: 82ch; }
+#task-gate { color: var(--cp-text-muted); font-size: .8rem; margin: 1rem 0; padding: .7rem .85rem; border: 1px solid var(--cp-border); border-radius: .625rem; }
+#task-gate[data-state="ready"] { border-color: var(--cp-success); }
+#task-gate[data-state="blocked"] { border-color: var(--cp-danger); }
+.task-footer-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.task-footer-actions .primary { margin-left: auto; }
+.blocker-editor { max-width: 650px; border: 1px solid var(--cp-border); border-radius: .625rem; padding: 1rem; margin-bottom: 1rem; }
+.blocker-editor label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: .5rem; }
+.blocker-editor button { margin: .75rem .4rem 0 0; }
+.run-complete { color: var(--cp-success); }
+.capabilities-link { display: inline-block; font-weight: 650; padding-block: .4rem; }
+body[data-run-mode="guided"] .test-table { min-width: 540px; }
+body[data-run-mode="guided"] .resource-active .task-document { grid-column: 1 / -1; }
+body[data-run-mode="guided"] .resource-active .task-dock { display: none; }
+body[data-run-mode="guided"] .resource-active .step { max-width: 980px; }
+@media (max-width: 1200px) { body[data-run-mode="guided"] .layout { grid-template-columns: 180px minmax(0, 1fr); gap: 1.5rem; }body[data-run-mode="guided"] .run-workarea { grid-template-columns: minmax(0, 1fr) 255px; gap: 1.1rem; }body[data-run-mode="guided"] .step-head h2 { font-size: 1.5rem; } }
+@media (max-width: 1000px) { body[data-run-mode="guided"] .layout { grid-template-columns: 1fr; }body[data-run-mode="guided"] .toc { position: static; max-height: none; padding-bottom: 1rem; }.nav-title small { font-size: .68rem; }body[data-run-mode="guided"] .jump-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }.journey-status details { display: none; }body[data-run-mode="guided"] .task-dock { top: 5.5rem; } }
+@media (max-width: 700px) { body[data-run-mode="guided"] .hero { padding: 1.25rem 1rem; }body[data-run-mode="guided"] .hero h1 { font-size: 1.75rem; }body[data-run-mode="guided"] .cover-meta { display: block; margin: .8rem 0 0; }body[data-run-mode="guided"] .layout { padding: 1rem; }body[data-run-mode="guided"] .run-workarea { display: flex; flex-direction: column; }.task-document { order: 2; width: 100%; }body[data-run-mode="guided"] .task-dock { position: static; max-height: none; overflow: visible; order: 1; width: 100%; }body[data-run-mode="guided"] .task-dock #task-fields { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0 .85rem; }body[data-run-mode="guided"] .task-dock .field { min-width: 0; }.run-toolbar { align-items: flex-start; }.run-toolbar-actions { gap: .3rem; }.expected-result { grid-template-columns: 1fr; gap: .35rem; }.task-launch { align-items: flex-start; }.portal-link { white-space: normal; }.task-footer-actions button { flex: 1 1 auto; }.task-footer-actions .primary { margin-left: 0; }.run-save-note { font-size: .73rem; }body[data-run-mode="guided"] .jump-nav { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 420px) { body[data-run-mode="guided"] .task-dock #task-fields { grid-template-columns: 1fr; }.run-toolbar-actions { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }.run-toolbar-actions button:last-child { grid-column: 1 / -1; } }
+#task-menu-toggle { display: none; }
+body[data-run-mode="guided"] .hero { padding-block: 1rem; }
+body[data-run-mode="guided"] .hero h1 { font-size: 1.8rem; margin-bottom: .4rem; }
+body[data-run-mode="guided"] .cover-copy .lede { max-width: none; margin-bottom: .7rem; font-size: .86rem; }
+body[data-run-mode="guided"] .rail:not([open]) { display: none; }
+body[data-run-mode="guided"] .lab-note { display: none; }
+body[data-run-mode="guided"] .environment { margin-bottom: 1rem; }
+@media (max-width: 1000px) {
+  body[data-run-mode] #task-menu-toggle { display: block; width: 100%; text-align: left; background: var(--cp-surface-soft); min-height: 44px; font-size: .85rem; }
+  body[data-run-mode] .toc-heading { display: none; }
+  body[data-run-mode] #task-menu-toggle[aria-expanded="false"] ~ .jump-nav,
+  body[data-run-mode] #task-menu-toggle[aria-expanded="false"] ~ .journey-status { display: none; }
+  body[data-run-mode] .toc { margin: 0 0 1rem; padding: 0; border: 0; }
+  body[data-run-mode] .jump-nav { margin-top: .5rem; }
+}
+@media print { body[data-run-mode] .lab-note { display: block; }body[data-run-mode] .hero { display: block; padding: 0 0 15pt; }body[data-run-mode] .hero h1 { font-size: 27pt; }body[data-run-mode] .cover-meta { display: block; margin: 0; }body[data-run-mode] .run-workarea { display: block; }body[data-run-mode] .step.is-task-hidden { display: block !important; }body[data-run-mode] .run-toolbar, body[data-run-mode] .run-save-note, body[data-run-mode] .task-launch, body[data-run-mode] .task-dock, body[data-run-mode] .task-exit, body[data-run-mode] .task-actions { display: none !important; }body[data-run-mode] .task-detail { display: block; border: 0; padding: 0; }body[data-run-mode] .task-detail > summary { display: none; }body[data-run-mode] .layout { display: block; padding: 0; }body[data-run-mode] .step { padding-block: 15pt; }.nav-title small { display: none; } }
+</style>
+<style id="concise-runbook-design">
+.guided-copy { display: none; }
+body[data-run-mode="guided"] .guided-copy { display: inline; }
+body[data-run-mode="guided"] .reference-copy { display: none; }
+body[data-run-mode="guided"] .task-document .step-head .tag,
+body[data-run-mode="guided"] .task-dock .field > .hint,
+body[data-run-mode="guided"] .task-document td > .hint,
+body[data-run-mode="guided"] .task-detail .reference-actions { display: none; }
+body[data-run-mode="guided"] .task-dock .field:focus-within > .hint { display: block; }
+body[data-run-mode="guided"] footer { display: none; }
+body[data-run-mode="guided"] .cover-copy .lede { margin-bottom: .6rem; }
+body[data-run-mode="guided"] .task-actions { font-size: .92rem; }
+body[data-run-mode="guided"] .task-actions li { margin-bottom: .55rem; }
+body[data-run-mode="guided"] .task-detail { margin-top: .6rem; padding-block: .7rem; }
+body[data-run-mode="guided"] .checks { padding-block: .7rem; }
+body[data-run-mode="guided"] .checks::before { content: "Confirm"; }
+body[data-run-mode="guided"] .check { font-size: .83rem; }
+body[data-run-mode="guided"] .task-exit { margin-top: 1rem; }
+body[data-run-mode="guided"] #task-gate { padding-block: .5rem; }
+.reference-screenshot { margin: 1.25rem 0; }
+.reference-screenshot img { display: block; max-width: 100%; max-height: 600px; border: 1px solid var(--cp-border); border-radius: .625rem; object-fit: contain; }
+.reference-screenshot figcaption { color: var(--cp-text-muted); font-size: .8rem; margin-top: .5rem; }
+@media print {
+  body[data-run-mode] .reference-copy { display: inline; }
+  body[data-run-mode] .guided-copy { display: none !important; }
+  body[data-run-mode] .task-document .step-head .tag,
+  body[data-run-mode] .task-document td > .hint,
+  body[data-run-mode] .task-detail .reference-actions { display: block; }
+  body[data-run-mode] footer { display: block; }
+  .reference-screenshot { break-inside: avoid; }
+}
+</style>
+<style id="balanced-runbook-design">
+.hero::before { opacity: var(--cp-cover-art-opacity); }
+.topbar { background: var(--cp-bg-elevated); }
+button.primary:disabled { background: var(--cp-surface-soft); color: var(--cp-text-muted); border-color: var(--cp-border-strong); }
+button.primary:disabled:hover { background: var(--cp-surface-soft); }
+body[data-run-mode="guided"] .task-document { padding: 1.15rem; border: 1px solid var(--cp-border); border-radius: 12px; background: var(--cp-surface); }
+body[data-run-mode="guided"] .task-dock { background: var(--cp-bg-elevated); }
+body[data-run-mode="guided"] .task-dock input,
+body[data-run-mode="guided"] .task-dock select,
+body[data-run-mode="guided"] .task-dock textarea { background: var(--cp-surface); }
+.task-optional-fields { border-top: 1px solid var(--cp-border); padding-top: .75rem; margin-top: .5rem; }
+.task-optional-fields > summary { cursor: pointer; font-size: .79rem; }
+.capture-field { border-top: 1px solid var(--cp-border); padding-top: .65rem; }
+.capture-field > label::after { content: "Capture after saving"; display: block; color: var(--cp-text-muted); font-weight: 400; font-size: .72rem; margin-top: .1rem; }
+#fix-task-gate { background: none; color: var(--cp-link); border: 0; padding: 0; min-height: 36px; text-decoration: underline; text-underline-offset: .2em; text-align: left; margin: -.35rem 0 .65rem; font-size: .8rem; }
+#fix-task-gate:hover { color: var(--cp-text); }
+body[data-run-mode="guided"] .task-document > .task-exit { margin-top: .75rem; padding-top: .9rem; }
+.task-footer-actions { gap: .45rem; }
+.task-footer-actions button { min-height: 40px; font-size: .8rem; padding: .45rem .7rem; }
+@media (max-width: 700px) { body[data-run-mode="guided"] .task-document { padding: 1rem; } }
+@media print {
+  :root { --cp-bg: #ffffff; --cp-bg-elevated: #ffffff; --cp-surface: #ffffff; --cp-surface-soft: #f0f2ed; --cp-text: #25342d; --cp-text-muted: #4b5c53; --cp-cover-paper: #ffffff; --cp-cover-ink: #25342d; --cp-cover-muted: #4b5c53; }
+  body[data-run-mode="guided"] .task-document { padding: 0; background: var(--cp-surface); border: 0; border-radius: 0; }
+  #fix-task-gate { display: none; }
+}
+</style>
+<style id="reference-first-design">
+.guided-path-note { color: var(--cp-cover-muted); font-size: .85rem; max-width: 46ch; margin: .9rem 0 0; }
+body[data-run-mode="reference"] #personalize-button { display: inline-flex; align-items: center; gap: .9rem; min-height: 48px; font-size: 1rem; padding: .7rem 1.15rem; }
+body[data-run-mode="reference"] #personalize-button::after { content: ""; width: .5rem; height: .5rem; border-top: 2px solid currentColor; border-right: 2px solid currentColor; transform: rotate(45deg); }
+body[data-run-mode="reference"] .cover-actions { align-items: center; }
+body[data-run-mode="reference"] #guided-mode { border: 1px solid var(--cp-border-strong); margin-left: .35rem; }
+body[data-run-mode="guided"] .guided-path-note { display: none; }
+.cover-disclaimer { color: var(--cp-cover-muted); font-size: .78rem; margin: -.35rem 0 1rem; }
+@media (max-width: 640px) { body[data-run-mode="reference"] .cover-actions { align-items: flex-start; flex-direction: column; gap: .8rem; }body[data-run-mode="reference"] #personalize-button { width: 100%; justify-content: space-between; } }
+@media print { .guided-path-note { display: none; } }
+</style>
+<style id="click-path-design">
+body[data-run-mode="reference"] .task-actions { display: block; }
+.task-actions > h3 { font-family: inherit; font-size: .86rem; font-weight: 650; margin: 0 0 .65rem; }
+.click-path-steps { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+.task-actions .click-path-steps > li { padding: .65rem 0 .7rem .35rem; margin: 0; border-bottom: 1px solid var(--cp-border); }
+.task-actions .click-path-steps > li:last-child { border-bottom: 0; }
+.click-path-steps > li::marker { color: var(--cp-text-muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.click-location { font-size: .76rem; color: var(--cp-text-muted); margin-bottom: .15rem; line-height: 1.5; }
+.click-path-steps p { font-size: .92rem; line-height: 1.6; margin: 0; max-width: 75ch; }
+.click-path-steps p strong { font-weight: 650; }
+body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
+@media (max-width: 640px) { .click-path-steps p { font-size: .87rem; }.click-location { font-size: .73rem; }.task-actions .click-path-steps > li { padding-block: .6rem; } }
+@media print { body[data-run-mode] .task-actions { display: block !important; }.click-path-steps p { font-size: 9pt; }.click-location { font-size: 8pt; }.click-path-steps > li { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#guide">Skip to the guide</a>
+<header class="topbar">
+  <div class="brand"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3" y="4" width="17" height="22" rx="5" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="8" width="17" height="22" rx="5" stroke="currentColor" stroke-width="1.5"/></svg><div>Microsoft Copilot<span>Slack MCP Connector to Copilot / Implementation Guide</span></div></div>
+  <div class="actions">
+    <button id="theme-button" type="button" aria-label="Switch light or dark theme" title="Switch light or dark theme"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M12 4a8 8 0 0 0 0 16V4Z" fill="currentColor"/></svg></button>
+    <button id="print-button" type="button">Print / PDF</button>
+    <button id="download-button" class="primary" type="button">Save a personalized copy</button>
+  </div>
+</header>
+<section class="hero" aria-labelledby="page-title">
+  <div class="cover-copy">
+    <h1 id="page-title">Bring Slack context<br><em>into Copilot.</em></h1>
+    <p class="lede">Set up a read-only Slack pilot. Copy, configure, confirm.</p>
+    <p class="cover-disclaimer">Independent community guide. Not an official Microsoft or Slack product.</p>
+    <div class="cover-actions"><button id="personalize-button" class="primary" type="button">Start guided setup</button><a href="#capabilities">Additional MCP tools &amp; scopes</a></div>
+    <p class="guided-path-note">Prefer step-by-step? Guided setup gives you one task, its values, and checks.</p>
+    <p class="cover-meta">Prepared for <strong data-bind="orgName">[Your organization]</strong> &middot; Read-only, public-channel pilot</p>
+  </div>
+  <figure class="connection-map" aria-label="Microsoft Copilot connects through your OAuth-configured custom connector to Slack hosted MCP">
+    <div class="map-node"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="m7 21 5-3 5 3M7 9h10M7 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p><strong>Microsoft Copilot</strong><small>Your signed-in pilot user</small></p></div>
+    <div class="map-node"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 8-4 4 4 4m6-8 4 4-4 4M13 5l-2 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><p><strong data-bind="connectorName">Slack</strong><small>Custom connector + per-user OAuth</small></p></div>
+    <div class="map-node"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 3v-3a2 2 0 0 1-2-2V8a2 2 0 0 1 3-2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 10h10M7 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p><strong>Slack hosted MCP</strong><small>Live, user-authorized content</small></p></div>
+  </figure>
+</section>
+<div class="layout">
+<aside class="toc" aria-label="Guide navigation and progress">
+  <div class="toc-heading">Implementation tasks</div>
+  <button id="task-menu-toggle" type="button" aria-expanded="false" aria-controls="task-menu-panel">Tasks and progress</button>
+  <nav class="jump-nav" id="task-menu-panel" aria-label="Guide sections"><a href="#step-1"><span>01</span><span class="nav-title">Check readiness<small data-task-state="step-1">Not started</small></span></a><a href="#step-2"><span>02</span><span class="nav-title">Enable the Slack app<small data-task-state="step-2">Not started</small></span></a><a href="#step-3"><span>03</span><span class="nav-title">Set Slack permissions<small data-task-state="step-3">Not started</small></span></a><a href="#step-4"><span>04</span><span class="nav-title">Register OAuth<small data-task-state="step-4">Not started</small></span></a><a href="#step-5"><span>05</span><span class="nav-title">Create the connector<small data-task-state="step-5">Not started</small></span></a><a href="#step-6"><span>06</span><span class="nav-title">Connect your pilot<small data-task-state="step-6">Not started</small></span></a><a href="#step-7"><span>07</span><span class="nav-title">Prove retrieval<small data-task-state="step-7">Not started</small></span></a><a href="#step-8"><span></span>Troubleshoot</a><a href="#capabilities"><span></span>Tools &amp; scopes</a><a href="#references"><span></span>Official sources</a></nav>
+  <div class="journey-status"><strong id="progress-label">0 completed</strong><div class="progress-track" id="progress" role="progressbar" aria-label="Setup checkpoint completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div><p>Mark checkpoints as you go.</p><details><summary><strong id="test-label">Not demonstrated</strong></summary><p id="test-caption">No live test results recorded</p></details></div>
+</aside>
+<main id="guide">
+<div class="run-toolbar" aria-label="Runbook controls">
+  <div class="mode-switch" role="group" aria-label="Guide viewing mode"><button id="reference-mode" type="button" aria-pressed="true">Full reference</button><button id="guided-mode" type="button" aria-pressed="false">Guided setup</button></div>
+  <div class="run-toolbar-actions"><button id="all-values-button" type="button" aria-controls="environment-panel">All values</button><button id="save-progress-button" type="button">Save progress</button><button id="handoff-button" type="button">Export run summary</button></div>
+</div>
+<p class="run-save-note">Manual checklist. No tenant changes. Save to keep progress. Explanations stay in Full reference.</p>
+<details class="rail" id="environment-panel">
+  <summary class="rail-header"><div><h2>Make this guide yours</h2><p class="hint">Tenant values stay in this file. Never enter secrets.</p><p id="input-summary" class="hint" aria-live="polite"></p></div><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+  <div id="profile-fields"></div>
+  <div class="rail-footer">
+    <button id="save-button" type="button">Save on this device</button>
+    <button id="restore-button" type="button">Restore device save</button>
+    <button id="forget-button" type="button">Forget device save</button>
+    <button id="reset-button" type="button">Start blank</button>
+    <div id="reset-panel" hidden>
+      <p class="hint">Clear entered values, checklists, test results, and this guide's device save? Existing downloaded copies are unchanged.</p>
+      <button id="confirm-reset" type="button">Clear this guide</button>
+      <button id="cancel-reset" type="button">Cancel</button>
+    </div>
+    <p class="hint">Nothing is sent to Microsoft or Slack by this file. Saving is explicit. Downloaded copies contain your non-secret values and recorded progress; review before sharing.</p>
+  </div>
+</details>
+  <div class="environment" aria-label="Personalized environment summary">
+    <div><span>Microsoft 365 tenant</span><strong data-bind="tenantDomain"></strong></div>
+    <div><span>Pilot user</span><strong data-bind="pilotUpn"></strong></div>
+    <div><span>Slack workspace</span><strong data-bind="slackWorkspace"></strong></div>
+    <div><span>Public test channel</span><strong data-bind="channelLabel"></strong></div>
+  </div>
+  <details class="lab-note"><summary>What this guide does, and what the lab demonstrated</summary><p>A guided evaluation using Slack's hosted MCP server and Microsoft's custom federated connector. No local server, Bolt app runtime, or Teams bot is required. This file configures nothing automatically: work in the linked admin portals and record your own results.</p><p>In the source lab, an independent diagnostic identified disabled app-level Slack MCP access as a blocker. After that access was enabled, the operator confirmed Slack tools were listed and reported successful Copilot retrieval. The workspace was reported to be on Slack Free; that observation is not a universal entitlement guarantee. Citation accuracy, freshness, cross-user isolation, token refresh, and revocation behavior were not separately confirmed. Customer checkpoints start unchecked: validate your own tenant before production use.</p></details>
+<div class="task-launch" id="task-launch"><div><span class="task-role" id="task-role"></span><p id="task-location"></p></div><div class="task-launch-actions"><button id="task-values-button" type="button" aria-controls="task-fields">Edit task values</button><a id="task-portal" class="portal-link" href="https://admin.microsoft.com/" target="_blank" rel="noopener noreferrer">Open portal</a></div></div>
+<div class="run-workarea">
+<div class="task-document" id="task-document">
+<section class="step" id="step-1">
+  <div class="step-head"><div class="step-number">01</div><div><span class="tag">Documented requirements + lab choices</span><h2>Confirm the route and the two identities</h2></div></div>
+  <p>Use a Microsoft admin account in <strong data-bind="tenantDomain"></strong> to configure the connector, and the pilot account <strong data-bind="pilotUpn"></strong> to use it. The same person must also authorize the intended Slack account; do not assume matching email addresses automatically connect the identities.</p>
+  <ol>
+    <li>In <a href="https://admin.microsoft.com/" target="_blank" rel="noopener noreferrer">Microsoft 365 admin center</a>, confirm the displayed tenant before making changes. Setup requires a <strong>Global Administrator or AI Administrator</strong>. The pilot user needs a <strong>Copilot license</strong> under the current federated-connector guidance.</li>
+    <li>Confirm app-creation/installation rights in <strong data-bind="slackWorkspace"></strong>, and access to <a href="https://dev.teams.microsoft.com/tools" target="_blank" rel="noopener noreferrer">Teams Developer Portal</a> in the Microsoft demo/pilot tenant.</li>
+    <li>Search <strong>Copilot &gt; Connectors &gt; Gallery</strong> for Slack. A Microsoft-published federated Slack connector is documented, but tenant availability can differ. If available, inspect that supported route before deciding custom setup is necessary.</li>
+  </ol>
+  <div id="route-notice" class="notice"></div>
+  <div id="plan-notice" class="notice"></div>
+  <div class="notice info"><strong>What federated means:</strong> live retrieval, not a crawl/index of Slack into Microsoft 365. Retrieved text still enters Copilot processing and can appear in responses and conversation history. Do not describe this as "data never leaves Slack."</div>
+  <details><summary>Why a Teams-branded portal for a Copilot connector?</summary><p>Microsoft's custom federated connector documentation explicitly uses the Teams Developer Portal to register OAuth and a Teams-domain callback to complete sign-in. These are shared authentication services. You are <strong>not</strong> creating a Teams bot or installing a Teams app.</p><p><a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors#oauth-20" target="_blank" rel="noopener noreferrer">Source: custom federated connectors, OAuth 2.0</a></p></details>
+  <div class="checks">
+    <label class="check"><input type="checkbox" data-check="tenant"><span>I confirmed the correct Microsoft tenant, admin role, and pilot user's Copilot license.</span></label>
+    <label class="check"><input type="checkbox" data-check="route"><span>I checked the gallery and intentionally selected the custom hosted-MCP route.</span></label>
+  </div>
+</section>
+<section class="step" id="step-2">
+  <div class="step-head"><div class="step-number">02</div><div><span class="tag">Slack / internal app identity</span><h2>Create or reuse an internal Slack app</h2></div></div>
+  <ol>
+    <li>Open <a href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer">Slack app management</a>. At the upper right of <strong>Your Apps</strong>, click <strong>Create New App</strong>.</li>
+    <li>In <strong>Create new app</strong>, under <strong>From a template</strong>, click the <strong>Starter app</strong> tile, then <strong>Continue</strong> at the bottom right. Do not select <strong>AI agent</strong> or use the coding-agent prompt on the right.</li>
+    <li>In the following setup screens, enter <strong data-bind="appName"></strong> in <strong>App Name</strong> and select <strong data-bind="slackWorkspace"></strong> in <strong>Workspace</strong>. Click <strong>Continue</strong> when offered. At <strong>Review your app</strong>, review the settings and click <strong>Create</strong>. If a no-scopes warning appears, <strong>Create Anyway</strong> creates the registration without those optional capabilities; the required user scopes are added in task 03.</li>
+    <li>If Slack displays <strong>Install to Workspace</strong> or an access-consent page, review the template's requested permissions before proceeding. The required user OAuth consent occurs in task 06; installing a starter bot does not complete it.</li>
+    <li>When app settings opens, select <strong>Basic Information</strong> in the app's left sidebar. In <strong>App Credentials</strong>, copy the <strong>App ID</strong> and non-secret <strong>Client ID</strong> into this guide's task values. Keep the <strong>Client Secret</strong> in Slack until the direct portal-to-portal copy in task 04.</li>
+  </ol>
+  <p class="hint">This path matches the supplied Starter app screen. Slack's written quickstart also documents a <strong>Pick features &gt; Continue</strong> path; older screens may say <strong>From scratch</strong>. These are alternative entry paths, not extra buttons to click after Starter app. If a later screen differs, use its app-name, workspace, and review controls rather than installing development tools. Existing-app users can open their app directly and start at Basic Information.</p>
+  <p><a id="slack-app-link" href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer">Open your Slack app settings</a> <span class="muted">(personalized after entering a valid App ID)</span></p>
+  <h3>Enable the app for Slack MCP server access</h3>
+  <p>In the app settings, open the <strong>Agents &amp; AI / assistant settings</strong> page and review the control for <strong>Slack MCP server access</strong>. Enable that access for this internal app, and complete any required approval or reinstallation after reviewing changes. Page labels can vary; do not assume creating an app or adding OAuth scopes automatically enables MCP.</p>
+  <p><a id="slack-mcp-access-link" href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer">Open your app's MCP / assistant settings</a> <span class="muted">(uses your App ID and the /app-assistant settings path)</span></p>
+  <div class="notice"><strong>Observed prerequisite:</strong> a direct Slack MCP initialization returned HTTP 400 / JSON-RPC <code>-32600</code>: <em>App is not enabled for Slack MCP server access.</em> Slack directed the app owner to its <code>/app-assistant</code> settings page. A valid user token and the three correct scopes alone did not pass this gate. This requirement does not mean you need to run a Bolt bot or build an agent response loop.</div>
+  <div class="table-wrap"><table><thead><tr><th>Identifier</th><th>Used for</th></tr></thead><tbody><tr><td>Slack App ID</td><td>Identifies the app in Slack; typically starts with A. It is not the OAuth Client ID.</td></tr><tr><td>Slack Client ID</td><td>Identifies your registered OAuth client; copy from App Credentials.</td></tr><tr><td>Client Secret</td><td>Copy directly from Slack into Microsoft's OAuth form. Never paste it into this file, chat, source code, or a screenshot.</td></tr><tr><td>Microsoft OAuth registration ID</td><td>Generated in step 04; later entered in the Copilot connector. It is neither Slack identifier.</td></tr></tbody></table></div>
+  <div class="notice"><strong>Skip the Bolt starter prompt for this goal.</strong> It scaffolds a bot/app running inside Slack. Bot tokens and app-level Socket Mode tokens are not the credentials used by this per-user hosted-MCP connection. No plugin install, CLI login, or VS Code project is needed to attempt this route.</div>
+  <p class="hint">Slack currently permits its hosted MCP for internal apps and Marketplace-published apps, not unlisted distributed apps. A customer's own internal registration is different from distributing one app across unrelated customers.</p>
+  <div class="checks"><label class="check"><input type="checkbox" data-check="app"><span>I created/reviewed the internal Slack app in the intended workspace and distinguished its App ID from Client ID.</span></label><label class="check"><input type="checkbox" data-check="mcp-enabled"><span>I enabled Slack MCP server access for this app and reviewed any required approval or reinstallation.</span></label></div>
+</section>
+<section class="step" id="step-3">
+  <div class="step-head"><div class="step-number">03</div><div><span class="tag">Slack / OAuth &amp; Permissions</span><h2>Configure redirect and read-only user scopes</h2></div></div>
+  <p>In <strong data-bind="appName"></strong>, open <strong>OAuth &amp; Permissions &gt; Redirect URLs</strong>. Add the exact value below and select <strong>Save URLs</strong>.</p>
+  <div class="value-box"><span class="mono" data-value="redirect"></span><button class="copy" type="button" data-copy="redirect">Copy</button></div>
+  <p>Scroll to <strong>User Token Scopes</strong>, not <strong>Bot Token Scopes</strong>, and add these three scopes for this public-channel pilot:</p>
+  <div class="table-wrap"><table><thead><tr><th>User scope</th><th>Purpose</th><th>Copy</th></tr></thead><tbody><tr><td><code>search:read.public</code></td><td>Search public-channel content in the authorized workspace.</td><td><button class="copy" type="button" data-copy="searchScope">Copy</button></td></tr><tr><td><code>channels:history</code></td><td>Read public-channel messages and threads.</td><td><button class="copy" type="button" data-copy="historyScope">Copy</button></td></tr><tr><td><code>channels:read</code></td><td>Discover public channels and related metadata.</td><td><button class="copy" type="button" data-copy="channelScope">Copy</button></td></tr></tbody></table></div>
+  <div class="notice danger"><strong>This is not a one-channel permission boundary.</strong> Public search can cover public channels across the user's authorized workspace, even channels the user has not joined. Naming <span data-bind="channelLabel"></span> in prompts is a test filter, not an access-control policy. Use an isolated lab or an explicitly approved pilot workspace.</div>
+  <p>Do not add private-channel, DM, file, or write scopes for this baseline. Existing Bolt bot scopes do not substitute for user scopes. A yellow "reinstall" banner means scope changes are not yet granted to existing installations/tokens: finish this configuration first, then review and complete any required install/reinstall and the pilot user's OAuth consent before testing. Do not assume saving scopes grants access.</p>
+  <p>For each scope, click <strong>Add an OAuth Scope</strong> inside <strong>User Token Scopes</strong>, type the exact scope name, and select the matching result. Repeat three times. If Slack requires installation now, use <strong>Install to Workspace</strong> or <strong>Reinstall to Workspace</strong>, verify the intended workspace and scopes, then approve only after review. Do not copy any issued tokens into this guide.</p>
+  <details><summary>PKCE and token rotation: avoid an accidental irreversible change</summary><p>This guide mirrors an initial <strong>confidential-client, client-secret</strong> test with PKCE off. Microsoft's custom-connector guide makes PKCE optional; Slack's metadata advertises S256 support. Slack's separate "enable PKCE" app setting changes the app to a public client and is one-way without Slack support. Do not toggle it or enable token rotation blindly. For a production pilot, agree the OAuth security model with the responsible administrators and verify the resulting exchange.</p></details>
+  <div class="checks"><label class="check"><input type="checkbox" data-check="redirect"><span>I saved the exact Microsoft redirect URL in Slack.</span></label><label class="check"><input type="checkbox" data-check="user-scopes"><span>All three scopes are under User Token Scopes, and their workspace-wide public-channel reach is approved.</span></label></div>
+</section>
+<section class="step" id="step-4">
+  <div class="step-head"><div class="step-number">04</div><div><span class="tag">Microsoft / OAuth registration</span><h2>Tell Microsoft how to sign users into Slack</h2></div></div>
+  <p>In <a href="https://dev.teams.microsoft.com/tools" target="_blank" rel="noopener noreferrer">Teams Developer Portal</a>, sign into <strong data-bind="tenantDomain"></strong>. Select <strong>Tools &gt; OAuth client registration &gt; New OAuth client registration</strong> (also labeled "New OAuth connection" in some versions).</p>
+  <div class="table-wrap"><table id="oauth-table"><thead><tr><th>Portal field</th><th>Your value</th><th>Copy</th></tr></thead><tbody></tbody></table></div>
+  <p><strong>Client Secret:</strong> enter it directly from Slack <strong>Basic Information &gt; App Credentials</strong>. This guide intentionally has no field to collect it. The secret is not your bot token or app-level token.</p>
+  <p><strong>Scope formatting:</strong> this Microsoft portal field expects <strong>comma-separated entries</strong>, so copy <code>search:read.public,channels:history,channels:read</code>. Do not paste the space-delimited OAuth wire-format list into a field whose help text requires commas. If a later portal version uses separate entries/chips, add all three individually. A saved form alone does not prove the authorization request is correct.</p>
+  <div class="notice info"><strong>Why "Request body parameters"?</strong> Slack's published OAuth metadata specifies <code>client_secret_post</code>. This sends the client credentials in the HTTPS token request body, rather than an HTTP Basic header. The token and refresh endpoint are the same Slack URL.</div>
+  <ol><li>Review the tenant restriction, URLs, credentials, and scopes. Select <strong>Save</strong>.</li><li>Copy the resulting <strong>OAuth client registration ID</strong> into the personalization panel. Do not substitute your Slack App ID or Client ID.</li></ol>
+  <p class="hint">"Any Teams app" is an app-binding setting, not a request to create a Teams app. Keep the organization restriction to <strong>My organization only</strong> for this pilot. Existing registrations and portal controls can differ; verify against current Microsoft guidance.</p>
+  <div class="checks"><label class="check"><input type="checkbox" data-check="oauth"><span>I saved the OAuth registration in the correct Microsoft tenant and recorded its generated registration ID.</span></label></div>
+</section>
+<section class="step" id="step-5">
+  <div class="step-head"><div class="step-number">05</div><div><span class="tag">Microsoft 365 admin center / custom federated connector</span><h2>Create the Copilot connection</h2></div></div>
+  <p>Go to <a href="https://admin.microsoft.com/" target="_blank" rel="noopener noreferrer">Microsoft 365 admin center</a> &gt; <strong>Copilot &gt; Connectors &gt; Gallery &gt; Created by your org &gt; Create a new connector &gt; Connect to MCP server &gt; Add</strong>. You can draft name/description early; the OAuth registration must exist before you finish the authenticated setup.</p>
+  <div class="table-wrap"><table id="connector-table"><thead><tr><th>Connector field</th><th>Your value</th><th>Copy</th></tr></thead><tbody></tbody></table></div>
+  <div class="notice"><strong>Publisher and legal metadata require review.</strong> The default developer and legal links identify <em>Slack's hosted service</em> for a private lab, not a Slack-certified Copilot integration. Slack's privacy policy excludes third-party integrations. These links do not establish coverage for your organization's custom integration or Microsoft processing. Replace/approve applicable developer details and notices in the personalization panel before a customer rollout; do not use placeholder Contoso URLs or claim to publish on Slack's behalf.</div>
+  <p>Choose <strong>OAuth 2.0</strong>, not "No Auth" or Microsoft Entra SSO for this direct Slack endpoint. The URL is <code>https://mcp.slack.com/mcp</code>, not an <code>app.slack.com/client/...</code> workspace/channel URL.</p>
+  <p>Review the connector notice yourself before accepting it. Scope availability to the pilot account wherever the wizard offers rollout controls. If availability is configured only after creation, coordinate existing tenant access controls first, then immediately restrict staging; do not assume a new connection starts private. Select <strong>Create</strong> or <strong>Save</strong> only after that review.</p>
+  <div class="checks"><label class="check"><input type="checkbox" data-check="legal"><span>The responsible owner approved the developer identity, notices, legal links, and intended data processing.</span></label><label class="check"><input type="checkbox" data-check="connector"><span>I created the connector using the hosted MCP URL and the Microsoft OAuth registration ID.</span></label></div>
+</section>
+<section class="step" id="step-6">
+  <div class="step-head"><div class="step-number">06</div><div><span class="tag">Governance + first user connection</span><h2>Stage the pilot, then connect as the user</h2></div></div>
+  <ol>
+    <li>Open <strong>Copilot &gt; Connectors &gt; Your connections &gt; <span data-bind="connectorName"></span></strong>. Under <strong>Staged rollout</strong>, select only <strong data-bind="pilotUpn"></strong> or an approved pilot group. Do not select "Deploy to all users" for the lab.</li>
+    <li>Check <strong>Agents &gt; Settings &gt; Agent and plugin access</strong> and the custom connector's individual state. Custom connectors are in the "built by your organization" category. Ensure the connector is enabled/unblocked without broadly enabling unrelated connectors.</li>
+    <li>Check <strong>Agents &gt; Settings &gt; User access</strong>. This is a tenant-wide ceiling: staging does not override it. The pilot user must be allowed by both controls and have the required Copilot license.</li>
+    <li>Allow up to <strong>10 minutes</strong> for documented propagation. As <strong data-bind="pilotUpn"></strong>, open Microsoft Copilot Chat &gt; <strong>... &gt; Settings &gt; Sources &gt; <span data-bind="connectorName"></span> &gt; Connect</strong>.</li>
+    <li>During Slack OAuth, verify <strong data-bind="slackWorkspace"></strong>, the intended Slack user, and the requested permissions. Review any installation/reinstallation approval before accepting. A bot installation by an admin is not proof of this user's authorization.</li>
+    <li>Return to Copilot and start a fresh conversation. Inspect the available tools, where the UI exposes them; verify no write/private/DM access was accidentally requested by this pilot configuration.</li>
+  </ol>
+  <div class="checks"><label class="check"><input type="checkbox" data-check="staging"><span>I verified the effective audience is only the approved pilot, not everyone in the tenant.</span></label><label class="check"><input type="checkbox" data-check="consent"><span>The pilot user's Slack OAuth flow completed in the intended workspace with the intended user scopes.</span></label><label class="check"><input type="checkbox" data-check="discovery"><span>The Slack tool list loads in Copilot; a connected label alone is not sufficient.</span></label></div>
+</section>
+<section class="step" id="step-7">
+  <div class="step-head"><div class="step-number">07</div><div><span class="tag">Pending until performed / record observed evidence</span><h2>Prove retrieval, freshness, and the boundary</h2></div></div>
+  <p>Use a recent, synthetic message in <strong data-bind="channelLabel"></strong>. Do not paste customer secrets into a demo. If you create the message, review it and its audience before posting. The text below is a <strong>proposed fixture</strong>; this file never posts it.</p>
+  <div class="value-box"><span class="mono" data-value="fixture"></span><button class="copy" type="button" data-copy="fixture">Copy fixture</button></div>
+  <h3>First Copilot prompt</h3>
+  <div class="value-box"><span class="mono" data-value="prompt"></span><button class="copy" type="button" data-copy="prompt">Copy prompt</button></div>
+  <p>Inspect a connector/tool invocation where available and open the Slack citation to confirm the exact message. A plausible answer, a saved registration, or a "connected" label is not sufficient evidence of retrieval.</p>
+  <div class="table-wrap"><table class="test-table"><thead><tr><th>Test</th><th>Expected observation</th><th>Your result</th></tr></thead><tbody>
+    <tr><td>Retrieval</td><td>Copilot uses the Slack source and returns the synthetic marker, owner, and decision. No live result means this integration is still unproven.</td><td><select class="result" data-test="retrieval" aria-label="Retrieval test result"></select></td></tr>
+    <tr><td>Citation</td><td>The returned link opens the exact source message in the intended Slack workspace for the authorized user.</td><td><select class="result" data-test="citation" aria-label="Citation test result"></select></td></tr>
+    <tr><td>Freshness</td><td>After an approved edit from 42 to 43 sample units, a fresh conversation retrieves 43 with the correct source. Record observed delay; do not assume zero latency.</td><td><select class="result" data-test="freshness" aria-label="Freshness test result"></select></td></tr>
+    <tr><td>Permission boundary</td><td>A separate test user without access to the Slack workspace cannot retrieve its content. Private channels/DMs must remain inaccessible under this baseline. Two workspace members may legitimately see the same public-channel content.</td><td><select class="result" data-test="boundary" aria-label="Permission boundary test result"></select></td></tr>
+    <tr><td>Disconnect/revoke</td><td>After an authorized pilot disconnect/revocation, a new tool request cannot retrieve fresh Slack content. Old conversation text may remain; distinguish that from new retrieval. Reconnect only with consent.</td><td><select class="result" data-test="revocation" aria-label="Disconnect and revocation test result"></select></td></tr>
+    <tr><td>Tool/scope review</td><td>The granted user scopes and usable tools match the read-only public-channel baseline. No bot token substitution, unintended write grants, private channels, or DMs.</td><td><select class="result" data-test="tools" aria-label="Tool and scope review result"></select></td></tr>
+  </tbody></table></div>
+  <p class="hint">Results are manually recorded, not detected by this HTML. "Not applicable" is not a pass and does not complete the baseline. Private-channel member/non-member isolation requires a separately approved expanded-scope test; this guide does not grant those scopes.</p>
+  <div class="checks"><label class="check"><input type="checkbox" data-check="evidence"><span>I recorded outcomes based on observed tool/source behavior, not on a plausible generated answer.</span></label><label class="check"><input type="checkbox" data-check="cleanup"><span>I revoked any accidentally exposed credentials and agreed whether to retain or remove the pilot connector/app.</span></label></div>
+</section>
+<section class="step" id="step-8">
+  <div class="step-head"><div class="step-number">08</div><div><span class="tag">Failure-driven troubleshooting</span><h2>Diagnose the boundary that actually failed</h2></div></div>
+  <details><summary>Slack says the app is not enabled for MCP server access</summary><p>This is an explicit app-level access gate, not evidence that the OAuth token is invalid. Open the internal app's <code>/app-assistant</code> settings page using the personalized link in step 02 and enable Slack MCP server access. Review any plan, permission, or installation requirements shown there instead of adding unrelated scopes. Retry discovery after enabling; a successful tool list and a real Copilot retrieval are still needed to demonstrate the full integration.</p></details>
+  <details><summary>OAuth form will not save</summary><p>Check all required fields, HTTPS URLs, exact Client ID/Client Secret, tenant restriction, and scope control formatting. The client secret is entered directly from Slack. Saving does not validate the whole token exchange. Do not troubleshoot by pasting credentials into chat or public token decoders.</p></details>
+  <details><summary>Slack reports redirect mismatch, invalid client, or invalid scope</summary><p>Compare the exact callback, including casing and path, with step 03. Confirm Slack <em>Client ID</em> (not App ID), current client secret, user-only authorization endpoint, and the three scopes under <em>User Token Scopes</em>. Review any pending scope reauthorization. Use the exact error text and redact secrets before sharing it.</p></details>
+  <details><summary>401/403 or token-exchange failure</summary><p>Confirm the authorization and token endpoints from Slack's metadata, <code>client_secret_post</code> / Request body parameters, and the pilot's app/workspace approval. If there are IP restrictions, check Microsoft's documented federated-connector egress requirements. Refresh failures require examining the actual refresh response and rotation configuration; a saved OAuth registration is not proof that refresh works.</p></details>
+  <details><summary>Connected, but tool permissions fail to load or no Slack tools appear</summary><p>A connected label is not proof of usable MCP access. Inspect the failed discovery operation's sanitized Response: the browser request can return HTTP 200 while the body reports <code>MCP tool discovery failed</code> and <code>responseCode: 500</code>. That does not identify a Slack-side root cause. Confirm the three User Token Scopes and the Microsoft portal's comma-separated Scope input first. If you correct the registration, save it, disconnect only this Slack source in Copilot, then reconnect and review consent to replace the stored connection. Retry tool discovery in a fresh conversation. Keep the existing app and connector; do not add permissions or switch off authentication blindly. If failure persists, capture the exact error, UTC time, and request/correlation ID for further diagnosis; never share headers, tokens, authorization codes, or a full HAR.</p></details>
+  <details><summary>Registration ID accepted, but no tools or 404 on calls</summary><p>Check that the endpoint includes <code>/mcp</code>, is Streamable HTTP, and matches the registered base URL. Confirm the OAuth registration was not bound to a specific Teams app. Slack does not support Dynamic Client Registration or the older SSE transport for this server. Capture a sanitized error; do not substitute a shared bot token or disable authentication.</p></details>
+  <details><summary>Connector does not appear in Copilot Sources</summary><p>Verify the same tenant and pilot identity, Copilot license, connector enabled/unblocked state, staged rollout, and tenant User access. Publisher-type controls and individual enablement must be considered together. Allow the documented propagation window, refresh Copilot, and start a new conversation.</p></details>
+  <details><summary>Connected, but search is empty or irrelevant</summary><p>First search for the exact synthetic marker in Slack itself. Verify workspace, current user, granted scopes, recent accessible content, and retention. Use keyword queries first. Slack's Real-time Search documentation distinguishes semantic/AI Search eligibility from keyword fallback; that distinction does not by itself prove hosted-MCP access for your plan. Honor rate-limit Retry-After guidance rather than retrying aggressively.</p></details>
+  <details><summary>Can we host it in VS Code instead?</summary><p>VS Code can be an MCP test client or a development environment for a custom server. GitHub Copilot in VS Code is a different client from Microsoft Copilot. A local stdio server or localhost URL is not directly reachable by Microsoft 365. A custom adapter needs an authenticated cloud-reachable HTTPS endpoint, per-user authorization, approved hosting/tunneling, and its own lifecycle. Build it only after identifying a concrete limitation of the hosted route.</p></details>
+  <details><summary>Cleanup without changing unrelated services</summary><p>Disable or delete only this pilot's custom connector in <strong>Your connections</strong>, as approved. Remove the specific OAuth registration and Slack app/grants if no longer needed, after checking dependencies. Revoke exposed bot/app tokens even though this route does not use them. Removing a local guide/device save does not revoke tokens or delete cloud resources.</p></details>
+</section>
+<section class="step" id="capabilities">
+  <h2>Additional tools exposed by Slack MCP</h2>
+  <p>This runbook intentionally stops at public-channel retrieval. Slack's server exposes more capabilities, each governed by the user's permissions, the app's granted scopes, plan availability, and the consuming client's support.</p>
+  <p><a class="capabilities-link" href="https://docs.slack.dev/ai/slack-mcp-server/#oauth-scopes" target="_blank" rel="noopener noreferrer">Open Slack's complete MCP tools-to-OAuth-scopes reference</a></p>
+  <div class="table-wrap"><table><thead><tr><th>Capability</th><th>Examples</th><th>Baseline</th></tr></thead><tbody><tr><td>Public-channel retrieval</td><td>Search messages, discover channels, read messages and threads.</td><td>Included</td></tr><tr><td>Private conversations</td><td>Private-channel, direct-message and group-DM retrieval.</td><td>Not granted</td></tr><tr><td>Files and people</td><td>Search/read files; search users and retrieve profiles.</td><td>Not granted</td></tr><tr><td>Messaging and reactions</td><td>Send/schedule messages, create conversations and add reactions.</td><td>Not granted</td></tr><tr><td>Canvases, lists and uploads</td><td>Read/create/update canvases and lists; upload files.</td><td>Not granted</td></tr></tbody></table></div>
+  <div class="notice"><strong>Expand only through a reviewed change.</strong> Identify the required operation, map it to the minimum scopes in Slack's reference, approve the new data/action boundary, update the Slack app and Microsoft OAuth registration, then reauthorize and test as the pilot user. Write actions and private data require a separate approval; this page does not add scopes, grant access, or guarantee that every listed Slack capability is surfaced by Copilot.</div>
+</section>
+<section class="step" id="references">
+  <p class="eyebrow">Evidence, not assumptions</p><h2>Official references and guide boundaries</h2>
+  <ol class="link-list">
+    <li><a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors" target="_blank" rel="noopener noreferrer">Microsoft: Set up custom federated connectors</a><small>Prerequisites, OAuth registration, Teams callback, connector creation, and rollout.</small></li>
+    <li><a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/federated-connectors-overview" target="_blank" rel="noopener noreferrer">Microsoft: Federated connectors overview</a><small>Supported experiences, licensing, controls, user connection, and data retrieval model.</small></li>
+    <li><a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/connectors-gallery-microsoft#collaboration" target="_blank" rel="noopener noreferrer">Microsoft: Connector gallery / collaboration</a><small>Lists a Slack federated connector; documentation is not proof of availability in a particular tenant.</small></li>
+    <li><a href="https://docs.slack.dev/ai/slack-mcp-server/" target="_blank" rel="noopener noreferrer">Slack: Hosted MCP server</a><small>Endpoint, Streamable HTTP transport, internal-app requirement, user OAuth endpoints and scopes.</small></li>
+    <li><a href="https://docs.slack.dev/app-management/quickstart-app-settings/#creating" target="_blank" rel="noopener noreferrer">Slack: App-creation wizard and alternative Pick features path</a><small>App Name, Workspace, Continue, Review your app, Create, and conditional Create Anyway. Its later bot/webhook tutorial is not this hosted-MCP setup.</small></li>
+    <li><a href="https://docs.slack.dev/ai/slack-mcp-server/#oauth-scopes" target="_blank" rel="noopener noreferrer">Slack: Additional MCP tools and required OAuth scopes</a><small>Capabilities beyond the baseline; no additional permissions are granted by this guide.</small></li>
+    <li><a href="https://mcp.slack.com/.well-known/oauth-authorization-server" target="_blank" rel="noopener noreferrer">Slack: OAuth authorization-server metadata</a><small>Machine-readable endpoints and client_secret_post authentication. This file does not fetch it automatically.</small></li>
+    <li><a href="https://learn.microsoft.com/en-us/plugins/plugin-authentication-oauth#use-the-teams-developer-portal" target="_blank" rel="noopener noreferrer">Microsoft: OAuth registration portal details</a><small>Supplementary guidance for base URL, organization/app restrictions, and credential configuration. The custom-connector article remains the primary workflow.</small></li>
+    <li><a href="https://docs.slack.dev/authentication/using-pkce/" target="_blank" rel="noopener noreferrer">Slack: PKCE considerations</a><small>Public-client setting and one-way change; do not conflate with the checkbox in Microsoft's portal.</small></li>
+    <li><a href="https://docs.slack.dev/apis/web-api/real-time-search-api/" target="_blank" rel="noopener noreferrer">Slack: Real-time Search API</a><small>Search scope reach, keyword/semantic differences, and user-token model.</small></li>
+    <li><a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/federated-connectors-network-requirements" target="_blank" rel="noopener noreferrer">Microsoft: Federated-connector network requirements</a><small>Relevant when inbound/source-IP restrictions apply.</small></li>
+  </ol>
+  <div class="notice info"><strong>Documented:</strong> hosted MCP, OAuth mechanics, custom connector configuration. <strong>Lab choices:</strong> public-channel-only scopes, pilot audience, initial client-secret test with PKCE off. <strong>Unproven until executed:</strong> your Slack plan eligibility, this pairing's token exchange/refresh, tool discovery, Copilot retrieval, citations, and permission behavior.</div>
+  <p class="hint">Prepared from official documentation consulted on 16 November 2026 and a guided configuration session. Interfaces, capabilities, plan entitlements, and requirements can change. Recheck the live sources and your organization's approval process before customer deployment.</p>
+</section>
+</div>
+<aside class="task-dock" id="task-dock" aria-label="Values for the current task"><h3 id="task-values-title">Task values</h3><p class="hint" id="task-values-hint">No passwords, secrets, or tokens.</p><div id="task-fields"></div></aside>
+</div>
+<section class="task-exit" id="task-exit" aria-label="Task completion and navigation">
+  <div class="expected-result"><strong>Done when</strong><p id="task-expected"></p></div>
+  <p id="task-gate" role="status" aria-live="polite"></p>
+  <button id="fix-task-gate" type="button" hidden>Go to next required item</button>
+  <div class="blocker-editor" id="blocker-editor" hidden><label for="blocker-reason">What is blocking this task?</label><select id="blocker-reason"><option value="">Select a reason</option><option value="approval">Waiting for access or approval</option><option value="identifier">Missing or incorrect configuration value</option><option value="oauth">OAuth or consent error</option><option value="discovery">Tool discovery failure</option><option value="verification">Verification result needs investigation</option><option value="other">Another issue - review troubleshooting</option></select><p class="hint">Record only the category here. Do not paste tokens, diagnostic dumps, or private customer content.</p><button id="clear-blocker" type="button">Clear blocker</button><button id="diagnose-button" type="button">Open troubleshooting</button></div>
+  <div class="task-footer-actions"><button id="previous-task" type="button">Previous task</button><button id="block-task" type="button">I'm blocked</button><button id="return-to-task" type="button" hidden>Back to setup task</button><button id="next-task" class="primary" type="button">Continue</button></div>
+</section>
+<footer>Independent community guide; not an official Microsoft or Slack product. This static page does not send entered setup values to a server. Explicit device saves stay in your browser; downloaded copies can contain internal tenant names and non-secret IDs. Do not enter credentials. GitHub serves this site and handles hosting request data under its <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">privacy statement</a>. There are no added analytics, external scripts, live API calls, or remote assets. Opening a portal or documentation link leaves this guide. Review saved copies before sharing.</footer>
+</main>
+</div>
+<div id="status" role="status" aria-live="polite"></div>
+<dialog id="copy-dialog" aria-labelledby="copy-title"><h2 id="copy-title">Copy manually</h2><p>Clipboard access is unavailable in this browser context. Select the text below and press Ctrl+C (or Command+C).</p><textarea id="copy-buffer" readonly aria-label="Text to copy"></textarea><button id="close-copy" type="button">Close</button></dialog>
+<noscript><div class="notice danger">JavaScript is disabled. Read the static steps, but personalization, copy buttons, progress, and downloads require JavaScript. Open the downloaded file in Edge or Chrome with JavaScript enabled.</div></noscript>
+<script id="embedded-state" type="application/json">{}</script>
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'slack-copilot-field-guide-v1';
+  const CONSTANTS = Object.freeze({
+    endpoint: 'https://mcp.slack.com/mcp',
+    redirect: 'https://teams.microsoft.com/api/platform/v1.0/oAuthRedirect',
+    authorization: 'https://slack.com/oauth/v2_user/authorize',
+    token: 'https://slack.com/api/oauth.v2.user.access',
+    scopes: 'search:read.public,channels:history,channels:read',
+    searchScope: 'search:read.public', historyScope: 'channels:history', channelScope: 'channels:read'
+  });
+  const groups = [
+    {title: 'Microsoft tenant', open: true, fields: [
+      {key: 'orgName', label: 'Organization (optional)', placeholder: 'Contoso', fallback: '[Your organization]', max: 100},
+      {key: 'tenantDomain', label: 'Tenant domain', placeholder: 'contoso.onmicrosoft.com', fallback: '[Your tenant domain]', kind: 'domain', required: true, hint: 'Use a domain, not a portal URL. Verify the signed-in directory in each portal.'},
+      {key: 'tenantId', label: 'Tenant ID (optional)', placeholder: 'Microsoft Entra tenant GUID', fallback: '[Tenant ID not recorded]', kind: 'guid'},
+      {key: 'pilotUpn', label: 'Pilot user sign-in', placeholder: 'pilot@contoso.onmicrosoft.com', fallback: '[Pilot user sign-in]', kind: 'email', required: true},
+      {key: 'gallery', label: 'Slack federated connector in gallery?', options: [['unknown','Not checked'],['available','Available - inspect native route first'],['missing','Not available in this tenant']], default: 'unknown'}
+    ]},
+    {title: 'Slack environment', open: true, fields: [
+      {key: 'slackWorkspace', label: 'Slack workspace name', placeholder: 'Contoso Lab', fallback: '[Your Slack workspace]', required: true, max: 100},
+      {key: 'slackTeam', label: 'Slack workspace / org ID (optional)', placeholder: 'T... or E...', fallback: '[Slack team ID]', kind: 'team'},
+      {key: 'plan', label: 'Slack plan', options: [['unknown','Not confirmed'],['free','Free'],['paid','Paid / sandbox entitlement to verify']], default: 'unknown'},
+      {key: 'appName', label: 'Internal Slack app name', default: 'Copilot Slack Lab', fallback: '[Slack app name]', required: true, max: 100},
+      {key: 'slackApp', label: 'Slack App ID (when created)', placeholder: 'A...', fallback: '[Slack App ID]', kind: 'app'},
+      {key: 'slackClientId', label: 'Slack Client ID (not secret)', placeholder: 'Numeric ID from App Credentials', fallback: '[Slack Client ID]', kind: 'client', hint: 'Never enter a Client Secret, bot token, or app-level token here.'}
+    ]},
+    {title: 'Connector and test', open: false, fields: [
+      {key: 'connectorName', label: 'Copilot connector display name (automatic)', default: 'Slack', fallback: 'Slack', required: true, max: 106, readOnly: true, hint: 'Slack plus your organization name, or Slack when Organization is blank.'},
+      {key: 'oauthRegId', label: 'Microsoft OAuth registration ID', placeholder: 'Generated in Teams Developer Portal', fallback: '[OAuth client registration ID]', kind: 'registration', hint: 'Record after step 04. This is not the Slack App ID or Client ID.'},
+      {key: 'channelName', label: 'Public test channel name', default: 'copilot-pilot', fallback: '[Public test channel]', kind: 'channel', max: 80},
+      {key: 'marker', label: 'Synthetic search marker', default: 'COPILOT-SLACK-PILOT-001', fallback: '[Synthetic test marker]', max: 100},
+      {key: 'description', label: 'Connector description (optional override)', multiline: true, max: 800, placeholder: 'Leave blank to generate from your workspace name', fallback: ''}
+    ]},
+    {title: 'Source-service / legal metadata', open: false, fields: [
+      {key: 'developer', label: 'Developer / source provider label', default: 'Slack', fallback: '[Approved developer name]', hint: 'Default identifies the hosted MCP provider, not an endorsement of this custom connection.', max: 150},
+      {key: 'website', label: 'MCP documentation / website URL', default: 'https://docs.slack.dev/ai/slack-mcp-server/', fallback: '[Approved website URL]', kind: 'https'},
+      {key: 'privacy', label: 'Applicable privacy policy URL', default: 'https://slack.com/trust/privacy/privacy-policy', fallback: '[Approved privacy policy URL]', kind: 'https'},
+      {key: 'terms', label: 'Applicable terms URL', default: 'https://slack.com/terms-of-service/user', fallback: '[Approved terms URL]', kind: 'https'}
+    ]}
+  ];
+  const fields = groups.flatMap(group => group.fields);
+  const fieldMap = new Map(fields.map(field => [field.key, field]));
+  const checkIds = Array.from(document.querySelectorAll('[data-check]'), input => input.dataset.check);
+  const testIds = Array.from(document.querySelectorAll('[data-test]'), input => input.dataset.test);
+  const testOptions = [['not-run','Not run'], ['passed','Passed'], ['failed','Failed'], ['na','Not applicable']];
+  const allowedResults = new Set(testOptions.map(([value]) => value));
+  const taskDefinitions = [
+    {id:'step-1', title:'Check readiness', role:'Microsoft 365 admin + Slack app owner', location:'Confirm both directories before making changes', portal:'admin', fields:['orgName','tenantDomain','tenantId','pilotUpn','slackWorkspace','slackTeam','gallery','plan'], required:['tenantDomain','pilotUpn','slackWorkspace','gallery'], checks:['tenant','route'], expected:'The pilot account is licensed, the correct Microsoft tenant and Slack workspace are identified, and the custom route is an intentional choice.', actions:['Record the tenant, pilot account, and Slack workspace in the values panel. You can add generated app IDs later.','Confirm the Microsoft admin role, the pilot user\'s Copilot license, and permission to create/install the Slack app.','Search the tenant connector gallery for Slack. Record the outcome and inspect a native connector first if available.','Confirm the two readiness checkpoints below. They record your review, not an automated check.']},
+    {id:'step-2', title:'Enable the Slack app', role:'Slack app owner', location:'Slack app settings > Basic Information, then Agents & AI / assistant settings', portal:'slack', fields:['appName','slackApp','slackClientId'], required:['appName','slackApp'], checks:['app','mcp-enabled'], expected:'The internal Slack app exists, its App ID is recorded, and Slack MCP server access is explicitly enabled.', actions:['Create an internal app from scratch in the intended Slack workspace, or review the existing app.','Record its App ID and non-secret Client ID. Keep the Client Secret in the official portal only.','Open the app\'s MCP / assistant settings using the personalized link below. Enable Slack MCP server access and review any approval or reinstall requirement.','Do not scaffold a Bolt bot or use bot/app-level tokens for this connection. Confirm the app and MCP access checkpoints.']},
+    {id:'step-3', title:'Set Slack permissions', role:'Slack app owner', location:'OAuth & Permissions > Redirect URLs and User Token Scopes', portal:'slack-oauth', fields:['slackApp','slackWorkspace'], required:['slackApp','slackWorkspace'], checks:['redirect','user-scopes'], expected:'The exact Microsoft callback is saved and all three scopes appear under User Token Scopes. Public-workspace reach is approved.', actions:['Copy the redirect URL below into Slack Redirect URLs and select Save URLs.','Add the three scopes below under User Token Scopes, not Bot Token Scopes.','Review the workspace-wide public-channel boundary. Leave private, DM, file, and write permissions out of this pilot.','Review any required reinstall/reauthorization notice. Keep the lab\'s PKCE and token-rotation settings unchanged unless an administrator approves a different security model.']},
+    {id:'step-4', title:'Register Microsoft OAuth', role:'Microsoft demo/pilot-tenant administrator', location:'Teams Developer Portal > Tools > OAuth client registration', portal:'oauth', fields:['appName','slackClientId','oauthRegId'], required:['appName','slackClientId','oauthRegId'], checks:['oauth'], expected:'The Microsoft OAuth registration is saved in the right tenant and its generated registration ID is captured for the connector.', actions:['Open Teams Developer Portal in the pilot Microsoft tenant and create an OAuth registration. This does not create a Teams bot.','Use the exact field values in the table. Enter the Client Secret directly from Slack; never put it in this guide.','Use commas between scopes in this portal, Any Teams app, My organization only, and Request body parameters client authentication. The PKCE-off value mirrors this initial confidential-client lab, not a blanket production recommendation.','Save, then capture the generated Microsoft OAuth registration ID in the values panel. It is not the Slack App ID or Client ID.']},
+    {id:'step-5', title:'Create the connector', role:'Global Administrator or AI Administrator', location:'Microsoft 365 admin center > Copilot > Connectors > Gallery > Create a new connector', portal:'admin', fields:['connectorName','description','oauthRegId','developer','website','privacy','terms'], required:['connectorName','oauthRegId','developer','website','privacy','terms'], checks:['legal','connector'], expected:'The custom OAuth connector is saved with the hosted MCP endpoint, the correct registration ID, and owner-approved legal metadata.', actions:['Choose Connect to MCP server, then copy the tailored connector values below.','Choose OAuth 2.0 and use the Microsoft OAuth registration ID. The endpoint must be https://mcp.slack.com/mcp, not a Slack channel URL.','Have the responsible owner review publisher identity, legal links, and data-processing notices. The default links describe Slack\'s hosted service only.','Review initial availability before saving. Coordinate pilot-only access; a new connector must not be assumed private by default.']},
+    {id:'step-6', title:'Connect the pilot user', role:'Microsoft administrator, then the licensed pilot user', location:'Your connections > Staged rollout; Copilot Chat > Settings > Sources', portal:'copilot', fields:['tenantDomain','pilotUpn','slackWorkspace','connectorName'], required:['tenantDomain','pilotUpn','slackWorkspace','connectorName'], checks:['staging','consent','discovery'], expected:'Only the approved pilot audience has access, Slack consent completes for the intended user, and the Slack tool list loads in Copilot.', actions:['In Your connections, restrict staged rollout to the pilot account or approved pilot group. Verify tenant User access and connector enabled/unblocked status too.','Allow the documented propagation window, then open Copilot as the licensed pilot user. In Settings > Sources, connect this Slack source.','Verify the Slack workspace, user identity, and permissions before approving consent.','Open the tool list. If it says Couldn\'t load tool permissions, use Troubleshoot; do not mark discovery complete just because a connected toast appears.']},
+    {id:'step-7', title:'Verify and hand off', role:'Pilot tester + responsible service owner', location:'Slack synthetic test channel and a fresh Copilot conversation', portal:'copilot', fields:['connectorName','channelName','marker'], required:['connectorName','channelName','marker'], checks:['evidence','cleanup'], expected:'All six baseline outcomes are recorded as passes with the source verified, and credential cleanup/retention is agreed. Export the self-reported run summary for handoff.', actions:['Review and post only the proposed synthetic fixture below to the approved public test channel. This guide never posts it.','Run the copied prompt in a new Copilot conversation, inspect tool activity, and open the exact Slack citation.','Perform each remaining test in the result table. Record what you observe; a plausible answer is not proof of retrieval or authorization.','Complete cleanup and evidence checkpoints. Save progress and export a run summary; Not run, Failed, and Not applicable are not passing results.']}
+  ];
+  const taskById = new Map(taskDefinitions.map(task => [task.id,task]));
+  const taskBriefs = {
+    'step-1':{actions:['Enter your tenant, pilot account, and Slack workspace.','Confirm admin access, Copilot licensing, and Slack app-install rights.','Check the connector gallery. Prefer native Slack if suitable.'],expected:'Correct environments, licensed pilot, and custom route confirmed.',image:'Microsoft 365 connector gallery with the Slack search result.'},
+    'step-2':{actions:['Create an internal Slack app in the intended workspace.','Record its App ID and Client ID.','Enable Slack MCP access on the app\'s assistant settings page.'],expected:'Internal app created; Slack MCP access enabled.',image:'Slack app assistant settings with MCP server access enabled.'},
+    'step-3':{actions:['Save the callback URL below in Slack.','Add all three scopes under User Token Scopes.','Review any reinstall prompt. Leave PKCE and rotation unchanged.'],expected:'Callback saved; three user scopes configured and approved.',image:'Saved redirect URL and all three User Token Scopes.'},
+    'step-4':{actions:['Create an OAuth registration in the correct Microsoft tenant.','Copy the table values. Enter the secret directly from Slack.','Save. Record the generated Microsoft OAuth registration ID.'],expected:'Registration saved; Microsoft OAuth ID recorded.',image:'OAuth endpoints, comma-separated scopes, and request-body authentication. Hide the secret.'},
+    'step-5':{actions:['Select Create a new connector > Connect to MCP server.','Copy the values below. Use OAuth 2.0.','Approve legal details and pilot-only availability, then save.'],expected:'Connector saved with the correct endpoint and OAuth ID.',image:'Saved custom connector showing the MCP endpoint and OAuth authentication.'},
+    'step-6':{actions:['Restrict staging and User access to the approved pilot.','As the pilot, connect Slack in Copilot Settings > Sources.','Approve the intended Slack account. Confirm the tool list loads.'],expected:'Pilot-only access; user consent complete; Slack tools listed.',image:'Copilot Sources with Slack connected and the tool list visible.'},
+    'step-7':{actions:['Post the reviewed synthetic fixture in your approved test channel.','Run the prompt. Open the original Slack citation.','Record all six tests, then export the run summary.'],expected:'Six passes recorded; source checked; cleanup agreed.',image:'Copilot response with Slack tool activity and a working source citation.'}
+  };
+  const taskClickPaths = {
+    'step-1':[
+      ['This guide','Click **All values**. Enter your **Organization**, **Tenant domain**, **Pilot user sign-in**, and **Slack workspace name**.'],
+      ['Microsoft 365 admin center','Open **admin.microsoft.com** with your admin account. Confirm the directory is **{{tenantDomain}}** before changing anything.'],
+      ['Left navigation','Click **Users > Active users**, select **{{pilotUpn}}**, then open **Licenses and apps**. Confirm the pilot has the required Copilot license.'],
+      ['Left navigation','Click **Copilot > Connectors**, then the **Gallery** tab. In the gallery search box, type **Slack**.'],
+      ['This guide > Task values','Set **Slack federated connector in gallery?** to the observed result. If no suitable native connector is available, follow this custom route.'],
+      ['Confirm below','Confirm the correct tenant/admin access and the decision to use a custom connector.']
+    ],
+    'step-2':[
+      ['Slack app management','Open **api.slack.com/apps**. Under **Your Apps**, click **Create New App** at the upper right.'],
+      ['Create new app dialog','Under **From a template**, click **Starter app**. Click **Continue** at the bottom right.'],
+      ['App setup screens','In **App Name**, enter **{{appName}}**. In **Workspace**, choose **{{slackWorkspace}}**. Click **Continue** when shown.'],
+      ['Review your app','Review the configuration, then click **Create**. If the no-scopes warning appears, click **Create Anyway**; task 03 adds the user scopes.'],
+      ['If installation or coding setup appears','Review any permission request before installing. Do **not** run the coding-agent prompt or generate bot/app tokens for this connection.'],
+      ['App settings > left sidebar','Click **Basic Information**. Under **App Credentials**, copy **App ID** and **Client ID** into this guide\'s task values. Keep the Client Secret out of the guide.'],
+      ['App settings > MCP / assistant page','Click the personalized **Open your app\'s MCP / assistant settings** link below. Find **Slack MCP server access** and switch it on. Save if prompted.'],
+      ['Confirm below','Check **Internal app and App ID confirmed** and **Slack MCP access enabled**. A created app alone is not enough.']
+    ],
+    'step-3':[
+      ['Slack app > left sidebar','Click **OAuth & Permissions**. Scroll to **Redirect URLs**.'],
+      ['Redirect URLs','Click **Add New Redirect URL**, paste the callback from the **Copy** button below, click **Add** if shown, then **Save URLs**.'],
+      ['Scopes > User Token Scopes','Scroll past **Bot Token Scopes**. In **User Token Scopes**, click **Add an OAuth Scope**.'],
+      ['User Token Scopes > scope picker','Search for **search:read.public** and select it. Repeat **Add an OAuth Scope** for **channels:history**, then **channels:read**.'],
+      ['User Token Scopes','Confirm all three names are listed here, not only under Bot Token Scopes. Leave private/DM/write scopes, PKCE, and rotation unchanged.'],
+      ['If Slack requests installation','Click **Install to Workspace** or **Reinstall to Workspace** only after reviewing the requested scopes. Verify **{{slackWorkspace}}** on consent, then approve.'],
+      ['Confirm below','Check the saved callback and approved user scopes. Do not copy the resulting tokens into this guide.']
+    ],
+    'step-4':[
+      ['Teams Developer Portal','Open **dev.teams.microsoft.com/tools** in the **{{tenantDomain}}** tenant. Click **Tools > OAuth client registration**.'],
+      ['OAuth client registration list','Click **New OAuth client registration** or **+ New OAuth connection**; if the list is empty, the button may say **Register client**.'],
+      ['App settings','Enter the registration name and **Base URL** from the table below. Set **Restrict usage by org** to **My organization only** and **Restrict usage by app** to **Any Teams app**.'],
+      ['OAuth settings > Client ID and Client secret','Copy **Client ID** from Slack **Basic Information > App Credentials**. Copy **Client Secret** directly from Slack into the portal, never into this guide.'],
+      ['OAuth settings > endpoints and Scope','Use the table\'s **Copy** buttons for Authorization, Token, Refresh, and **Scope**. Scope uses **commas** in this portal.'],
+      ['OAuth settings > client authentication','Keep **Request body parameters (default)** selected. For this initial confidential-client lab, leave **Enable PKCE** off; see Details before choosing a different security model.'],
+      ['Bottom of registration form','Click **Save**. Copy the generated **OAuth client registration ID** into this guide\'s field of that name. Do not use the Slack App ID.']
+    ],
+    'step-5':[
+      ['Microsoft 365 admin center > left navigation','Click **Copilot > Connectors**, then **Gallery**.'],
+      ['Gallery > Created by your org','On **Create a new connector**, click **Add**.'],
+      ['Custom connector page','Under **Connect to MCP server**, click **Add**.'],
+      ['Connector details','Use the table below to fill **Display name**, **Description**, and **Base URL / MCP endpoint URL**. The endpoint must include **/mcp**.'],
+      ['Developer and legal fields','Enter the owner-approved **Developer name**, **Website URL**, **Privacy policy URL**, and **Terms of use URL** from the table.'],
+      ['Authentication type','Select **OAuth 2.0**. In **OAuth registration ID**, paste the ID generated in Microsoft\'s portal, not Slack\'s App ID or Client ID.'],
+      ['Before submitting','Review the displayed notices and pilot-only availability. Then click **Save** or **Create**, as labeled in your tenant.'],
+      ['Connectors > Your connections','Open **{{connectorName}}**. Continue to task 06 to confirm staging; **Ready** does not prove sign-in or retrieval.']
+    ],
+    'step-6':[
+      ['Admin center > Copilot > Connectors','Click **Your connections**, then **{{connectorName}}**. In **Staged rollout**, click **Change** or **Add staging** if shown.'],
+      ['Staged rollout panel','Choose **Users** or the specific-users option, add **{{pilotUpn}}**, remove any all-users selection, then **Save** or **Apply**. Reopen staging to verify the effective audience.'],
+      ['Admin center > Agents > Settings','Open **User access** and verify the pilot is allowed. Check **Agent and plugin access** and the connector\'s enabled/unblocked state too; staging cannot override User access.'],
+      ['Copilot Chat as {{pilotUpn}}','After propagation (up to 10 minutes), open the **...** menu, click **Settings**, then **Sources**.'],
+      ['Sources > {{connectorName}}','Click **Connect**. In Slack\'s window, verify **{{slackWorkspace}}**, the intended user, and the scopes before clicking **Allow** or the displayed approval control.'],
+      ['Back in Copilot > Sources > {{connectorName}}','Open the source details and inspect **Tools**. If it says **Couldn\'t load tool permissions**, click **Try again**; if it persists, use **Troubleshoot** in this guide.'],
+      ['Confirm below','Confirm pilot-only access, the intended Slack consent, and an actual loaded tool list. A connected banner alone is not a pass.']
+    ],
+    'step-7':[
+      ['Slack > {{channelLabel}}','Review the fictional fixture below. Click **Copy fixture**, paste it in the approved public channel, and send it only after confirming the audience.'],
+      ['Copilot > new conversation','Click **Copy prompt** in this guide. Paste it into a fresh Copilot conversation and submit.'],
+      ['Copilot response','Expand any Slack tool activity, then click a Slack citation. Verify it opens the exact message in **{{slackWorkspace}}**.'],
+      ['This guide > test table','For **Retrieval** and **Citation**, change **Not run** to **Passed** only after those observations succeed.'],
+      ['Remaining test rows','Perform each test described in the table: freshness, permission boundary, approved disconnect/revocation, and tool/scope review. Record **Passed**, **Failed**, or **Not applicable** for the observed outcome.'],
+      ['Confirm and hand off','Complete **evidence** and **cleanup** below. Click **Save progress**, then **Export completed run** when all exit criteria pass; **Export run summary** can also capture an incomplete run.']
+    ]
+  };
+  const instructionLinkKeys = Object.freeze({
+    'https://mcp.slack.com/mcp':'mcp',
+    'dev.teams.microsoft.com/tools':'oauth',
+    'api.slack.com/apps':'slack',
+    'admin.microsoft.com':'admin',
+    'Microsoft 365 admin center':'admin',
+    'Slack app management':'slack',
+    'Teams Developer Portal':'oauth',
+    'Copilot Chat':'copilot',
+    "Open your app's MCP / assistant settings":'mcp-settings'
+  });
+  function externalLink(text,href) {
+    const link = document.createElement('a'); link.textContent = text; link.href = href;
+    link.target = '_blank'; link.rel = 'noopener noreferrer'; link.title = 'Open in a new tab';
+    return link;
+  }
+  function appendLinkedInstructionText(node,text) {
+    const pattern = /https:\/\/mcp\.slack\.com\/mcp|dev\.teams\.microsoft\.com\/tools|api\.slack\.com\/apps|admin\.microsoft\.com|Microsoft 365 admin center|Slack app management|Teams Developer Portal|Copilot Chat|Open your app's MCP \/ assistant settings/g;
+    let start = 0;
+    for (const match of text.matchAll(pattern)) {
+      node.append(document.createTextNode(text.slice(start,match.index)));
+      const link = externalLink(match[0],'https://api.slack.com/apps'); link.dataset.navTarget = instructionLinkKeys[match[0]]; node.append(link);
+      start = match.index + match[0].length;
+    }
+    node.append(document.createTextNode(text.slice(start)));
+  }
+  function appendClickInstruction(node,text) {
+    const pattern = /\*\*([^*]+)\*\*|\{\{([A-Za-z][A-Za-z0-9]*)\}\}/g;
+    let start = 0;
+    for (const match of text.matchAll(pattern)) {
+      appendLinkedInstructionText(node,text.slice(start,match.index));
+      if (match[1]) {
+        const strong = document.createElement('strong');
+        appendClickInstruction(strong,match[1]); node.append(strong);
+      } else {
+        const bound = document.createElement('span'); bound.dataset.bind = match[2]; node.append(bound);
+      }
+      start = match.index + match[0].length;
+    }
+    appendLinkedInstructionText(node,text.slice(start));
+  }
+  function buildClickPath(task) {
+    const block = document.createElement('div'); block.className = 'task-actions';
+    const title = document.createElement('h3'); title.textContent = 'Where to click'; block.append(title);
+    const list = document.createElement('ol'); list.className = 'click-path-steps';
+    for (const [where,action] of taskClickPaths[task.id]) {
+      const item = document.createElement('li');
+      const location = document.createElement('div'); location.className = 'click-location'; appendClickInstruction(location,where);
+      const instruction = document.createElement('p'); appendClickInstruction(instruction,action);
+      item.append(location,instruction); list.append(item);
+    }
+    block.append(list); return block;
+  }
+  const shortChecks = {
+    tenant:'Correct tenant, admin role, and licensed pilot.',route:'Gallery checked; custom route approved.',
+    app:'Internal app and App ID confirmed.','mcp-enabled':'Slack MCP access enabled.',
+    redirect:'Exact callback URL saved.','user-scopes':'Three USER scopes; workspace-wide public access approved.',
+    oauth:'Registration saved; Microsoft OAuth ID recorded.',legal:'Publisher, policies, and processing approved.',connector:'Connector saved with correct endpoint and OAuth ID.',
+    staging:'Effective audience restricted to the approved pilot.',consent:'Correct Slack user and workspace authorized.',discovery:'Slack tools listed, not just a connected label.',
+    evidence:'Outcomes verified against real tool activity and sources.',cleanup:'Exposed credentials revoked; retention or removal agreed.'
+  };
+  const shortTests = {retrieval:'Slack tool returns the fixture\'s marker, owner, and decision.',citation:'Citation opens the exact source message.',freshness:'Approved 42-to-43 edit appears in a new conversation.',boundary:'Unauthorized test user cannot retrieve workspace content. No private/DM access.',revocation:'After approved revocation, fresh retrieval fails; old history may remain.',tools:'Usable tools and grants match public-channel, read-only scope.'};
+  const referenceScreenshots = Object.freeze({});
+  const configTaskStart = {tenantDomain:0,tenantId:0,pilotUpn:0,slackWorkspace:0,slackTeam:0,gallery:0,plan:0,appName:1,slackApp:1,slackClientId:3,oauthRegId:3,connectorName:4,description:4,developer:4,website:4,privacy:4,terms:4,channelName:6,marker:6};
+  const resourceIds = ['step-8','capabilities','references'];
+  const allowedViews = new Set([...taskById.keys(),...resourceIds]);
+  const blockerOptions = new Set(['approval','identifier','oauth','discovery','verification','other']);
+  const secretPattern = /(?:xox[baprs]-[A-Za-z0-9-]{8,}|xapp-[A-Za-z0-9-]{8,}|xoxe[.-][A-Za-z0-9.-]{8,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|client_secret\s*[:=])/i;
+  let state;
+  let errors = new Map();
+  let printTheme;
+  let printDetails = [];
+  let printCopy = [];
+  let statusTimer;
+  let fieldLayoutKey = '';
+  let lastRenderedMode = '';
+  const controls = new Map();
+  const byId = id => document.getElementById(id);
+  function blankState() {
+    return {version: 1, values: Object.fromEntries(fields.map(field => [field.key, field.default || ''])), checks: {}, tests: Object.fromEntries(testIds.map(id => [id, 'not-run'])), workflow:{mode:'reference',current:'step-1',lastTask:'step-1',blockers:{}}};
+  }
+  function generatedConnectorName(orgName) {
+    const org = orgName.trim();
+    return org ? 'Slack ' + org : 'Slack';
+  }
+  function resetTaskEvidence(target,start) {
+    const affected = taskDefinitions.slice(start);
+    const hadEvidence = affected.some(task => task.checks.some(check => target.checks[check])) || testIds.some(test => target.tests[test] !== 'not-run');
+    for (const task of affected) for (const check of task.checks) target.checks[check] = false;
+    for (const test of testIds) target.tests[test] = 'not-run';
+    return hadEvidence;
+  }
+  function notify(message) {
+    clearTimeout(statusTimer);
+    byId('status').textContent = message;
+    statusTimer = setTimeout(() => { byId('status').textContent = ''; }, 9000);
+  }
+  function safeState(candidate) {
+    if (!candidate || candidate.version !== 1 || typeof candidate.values !== 'object' || candidate.values === null) throw new Error('Unrecognized saved guide format.');
+    const next = blankState();
+    for (const field of fields) {
+      if (!Object.prototype.hasOwnProperty.call(candidate.values, field.key)) continue;
+      const value = candidate.values[field.key];
+      if (typeof value !== 'string' || value.length > (field.max || 300)) throw new Error('A saved field has an invalid type or length.');
+      if (secretPattern.test(value)) throw new Error('The saved profile appears to contain credentials. It was not loaded.');
+      if (field.options && !field.options.some(([option]) => option === value)) throw new Error('A saved selection is not supported.');
+      next.values[field.key] = value;
+    }
+    if (candidate.checks && typeof candidate.checks === 'object') for (const key of checkIds) next.checks[key] = candidate.checks[key] === true;
+    if (candidate.tests && typeof candidate.tests === 'object') for (const key of testIds) if (allowedResults.has(candidate.tests[key])) next.tests[key] = candidate.tests[key];
+    if (candidate.workflow && typeof candidate.workflow === 'object') {
+      next.workflow.mode = candidate.workflow.mode === 'guided' ? 'guided' : 'reference';
+      if (allowedViews.has(candidate.workflow.current)) next.workflow.current = candidate.workflow.current;
+      if (taskById.has(candidate.workflow.lastTask)) next.workflow.lastTask = candidate.workflow.lastTask;
+      if (candidate.workflow.blockers && typeof candidate.workflow.blockers === 'object') for (const task of taskDefinitions) if (blockerOptions.has(candidate.workflow.blockers[task.id])) next.workflow.blockers[task.id] = candidate.workflow.blockers[task.id];
+    }
+    const connectorName = generatedConnectorName(next.values.orgName);
+    if (next.values.connectorName !== connectorName) {
+      next.values.connectorName = connectorName;
+      if (resetTaskEvidence(next,4)) notify('Display name updated to match Organization. Reconfirm task 5 onward for that name.');
+    }
+    return next;
+  }
+  function validate(field, value) {
+    if (!value) return '';
+    if (secretPattern.test(value)) return 'Do not enter credentials in this guide.';
+    switch (field.kind) {
+      case 'domain': return /^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/.test(value) ? '' : 'Enter a domain such as contoso.onmicrosoft.com, without https://.';
+      case 'guid': return /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value) ? '' : 'Enter the Microsoft Entra tenant GUID, or leave this optional field blank.';
+      case 'email': return /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(value) ? '' : 'Enter the pilot account sign-in, including its domain.';
+      case 'team': return /^[TE][A-Z0-9]+$/.test(value) ? '' : 'Slack workspace/org IDs start with T or E and use uppercase letters/digits.';
+      case 'app': return /^A[A-Z0-9]+$/.test(value) ? '' : 'Slack App IDs start with A and use uppercase letters/digits.';
+      case 'client': return /^\d+\.\d+$/.test(value) ? '' : 'Copy the numeric Client ID from Slack App Credentials, not the App ID.';
+      case 'registration': return /^A[A-Z0-9]+$/.test(value) || /^\d+\.\d+$/.test(value) || /\s/.test(value) ? 'Use the exact Microsoft OAuth registration ID, not a Slack identifier or text containing spaces.' : '';
+      case 'channel': return /^[a-z0-9][a-z0-9_-]*$/.test(value) ? '' : 'Use a Slack channel name without #, spaces, or a URL.';
+      case 'https': {
+        let url;
+        try { url = new URL(value); } catch { return 'Enter a complete HTTPS URL.'; }
+        return url.protocol === 'https:' && url.hostname && !url.username && !url.password ? '' : 'Use HTTPS without embedded credentials.';
+      }
+      default: return '';
+    }
+  }
+  function value(key) {
+    if (key === 'channelLabel') return '#' + value('channelName');
+    const field = fieldMap.get(key);
+    if (!field) return '';
+    return errors.has(key) ? '[Enter a valid ' + field.label + ']' : state.values[key] || field.fallback || '';
+  }
+  function description() {
+    return state.values.description || 'Search public Slack channels and retrieve messages and threads in ' + value('slackWorkspace') + ' to answer questions about project updates and decisions. Public-channel retrieval only; no posting or private-message access in this pilot.';
+  }
+  function copyValues() {
+    return {...CONSTANTS, oauthName: value('appName') + ' OAuth', clientId: value('slackClientId'), orgRestriction: 'My organization only', appRestriction: 'Any Teams app', pkce: 'Off for this initial confidential-client lab', clientAuth: 'Request body parameters (default) / client_secret_post', connectorName: value('connectorName'), description: description(), developer: value('developer'), website: value('website'), privacy: value('privacy'), terms: value('terms'), auth: 'OAuth 2.0', registration: value('oauthRegId'), fixture: value('marker') + ' | Synthetic lab fixture. Project Beacon approved 42 sample units. Owner: Taylor. Decision: proceed with a limited pilot. This is fictional test data.', prompt: 'Use the ' + value('connectorName') + ' Slack source. Find the message containing "' + value('marker') + '" in ' + value('channelLabel') + '. What was approved, who owns it, and what decision was made? Cite the original Slack message. If the source cannot be accessed, say so; do not guess.'};
+  }
+  const copyDependencies = {oauthName:['appName'],clientId:['slackClientId'],connectorName:['connectorName'],description:['slackWorkspace'],developer:['developer'],website:['website'],privacy:['privacy'],terms:['terms'],registration:['oauthRegId'],fixture:['marker'],prompt:['connectorName','marker','channelName']};
+  function canCopy(key) {
+    if (key === 'description' && state.values.description) return !errors.has('description');
+    return (copyDependencies[key] || []).every(dependency => Boolean(state.values[dependency]) && !errors.has(dependency));
+  }
+  function makeFields() {
+    for (const group of groups) {
+      const details = document.createElement('details');
+      details.className = 'field-group'; details.open = group.open;
+      const summary = document.createElement('summary'); summary.textContent = group.title; details.append(summary);
+      for (const field of group.fields) {
+        const wrapper = document.createElement('div'); wrapper.className = 'field';
+        wrapper.dataset.field = field.key;
+        const label = document.createElement('label'); label.htmlFor = 'input-' + field.key; label.textContent = field.label;
+        const input = document.createElement(field.options ? 'select' : field.multiline ? 'textarea' : 'input');
+        input.id = label.htmlFor; input.name = field.key;
+        if (field.readOnly) input.readOnly = true;
+        if (field.options) for (const [optionValue, text] of field.options) { const option = document.createElement('option'); option.value = optionValue; option.textContent = text; input.append(option); }
+        else { if (!field.multiline) input.type = 'text'; input.maxLength = field.max || 300; input.placeholder = field.placeholder || ''; input.autocomplete = 'off'; input.spellcheck = false; }
+        const error = document.createElement('span'); error.id = 'error-' + field.key; error.className = 'error'; input.setAttribute('aria-describedby', error.id + (field.hint ? ' hint-' + field.key : ''));
+        input.addEventListener(field.options ? 'change' : 'input', () => {
+          const incoming = input.value.trim();
+          if (secretPattern.test(incoming)) {
+            input.value = ''; updateFieldValue(field.key,''); render(); error.textContent = 'Credential-like text removed. Revoke exposed credentials; enter secrets only in the official portal.'; input.setAttribute('aria-invalid','true'); notify('Credential-like text was removed and was not saved. Do not paste replacement credentials here.'); return;
+          }
+          updateFieldValue(field.key,incoming); render();
+        });
+        wrapper.append(label, input, error);
+        if (field.hint) { const hint = document.createElement('p'); hint.className = 'hint'; hint.id = 'hint-' + field.key; hint.textContent = field.hint; wrapper.append(hint); }
+        controls.set(field.key, {input,error,wrapper,home:details}); details.append(wrapper);
+      }
+      byId('profile-fields').append(details);
+    }
+  }
+  function updateFieldValue(key,incoming) {
+    if (key === 'connectorName') { controls.get(key).input.value = state.values.connectorName; return; }
+    const previous = state.values[key]; state.values[key] = incoming;
+    let start = configTaskStart[key];
+    if (key === 'orgName') {
+      const name = generatedConnectorName(incoming);
+      if (name === state.values.connectorName) return;
+      state.values.connectorName = name; controls.get('connectorName').input.value = name;
+      start = 4;
+    }
+    if (previous === incoming || start === undefined) return;
+    if (resetTaskEvidence(state,start)) notify('Configuration changed. Reconfirm task ' + (start+1) + ' onward; recorded test results were reset.');
+  }
+  function buildTable(id, rows) {
+    const body = byId(id).tBodies[0];
+    for (const [label, key, note] of rows) {
+      const tr = document.createElement('tr'); const title = document.createElement('td'); title.textContent = label;
+      const cell = document.createElement('td'); const text = document.createElement('code'); text.dataset.value = key; cell.append(text);
+      if (note) { const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = note; cell.append(hint); }
+      const action = document.createElement('td'); const button = document.createElement('button'); button.type = 'button'; button.className = 'copy'; button.dataset.copy = key; button.textContent = 'Copy'; button.setAttribute('aria-label','Copy ' + label); action.append(button);
+      tr.append(title,cell,action); body.append(tr);
+    }
+  }
+  function render() {
+    errors = new Map();
+    for (const field of fields) {
+      const problem = validate(field, state.values[field.key]); if (problem) errors.set(field.key,problem);
+      const control = controls.get(field.key); control.error.textContent = problem; control.input.setAttribute('aria-invalid', String(Boolean(problem)));
+    }
+    for (const node of document.querySelectorAll('[data-bind]')) node.textContent = value(node.dataset.bind);
+    const values = copyValues();
+    for (const node of document.querySelectorAll('[data-value]')) {
+      const key = node.dataset.value;
+      const text = values[key] || '';
+      if (['website','privacy','terms'].includes(key) && canCopy(key)) node.replaceChildren(externalLink(text,text));
+      else node.textContent = text;
+    }
+    for (const button of document.querySelectorAll('[data-copy]')) button.disabled = !canCopy(button.dataset.copy);
+    for (const input of document.querySelectorAll('[data-check]')) input.checked = state.checks[input.dataset.check] === true;
+    let completed = 0; for (const key of checkIds) if (state.checks[key]) completed++;
+    byId('progress-label').textContent = completed + ' / ' + checkIds.length + ' completed';
+    const percent = Math.round(completed / checkIds.length * 100); byId('progress-fill').style.width = percent + '%'; byId('progress').setAttribute('aria-valuenow', String(percent));
+    let passed = 0; let failed = 0;
+    for (const input of document.querySelectorAll('[data-test]')) { const result = state.tests[input.dataset.test]; input.value = result; input.dataset.state = result; if (result === 'passed') passed++; if (result === 'failed') failed++; }
+    byId('test-label').textContent = failed ? 'Recorded failure' : passed === testIds.length ? 'Baseline passes recorded' : 'Not demonstrated';
+    byId('test-caption').textContent = passed + ' / ' + testIds.length + ' passes; ' + failed + ' failures. Self-reported, not automatic.';
+    const missing = fields.filter(field => field.required && !state.values[field.key]).length;
+    byId('input-summary').textContent = errors.size ? errors.size + ' invalid value(s); fix before saving or exporting.' : missing ? missing + ' initial environment value(s) still blank. IDs can be added as you go.' : 'Initial values entered. Add generated IDs as you complete the steps.';
+    for (const id of ['download-button','save-button']) byId(id).disabled = errors.size > 0;
+    const route = byId('route-notice');
+    route.textContent = state.values.gallery === 'available' ? 'Gallery connector found: inspect its setup, supported capabilities, and governance first. The custom route below remains a reference, not a requirement to duplicate an existing connector.' : state.values.gallery === 'missing' ? 'No gallery connector in this tenant: continue with the candidate custom OAuth connection to Slack hosted MCP below. Absence from the gallery does not prove the custom route will succeed.' : 'Route check pending: search your own tenant gallery first. A documented listing does not guarantee rollout to your tenant.';
+    byId('plan-notice').textContent = state.values.plan === 'free' ? 'Slack Free: do not upgrade on assumption alone. The hosted MCP documentation consulted did not explicitly establish Free-plan eligibility. Verify access, scope availability, retention, and actual tool calls. AI Search/semantic eligibility is a separate question.' : 'Slack entitlement: verify your exact plan/workspace and app policies. Paid status or successful app creation alone is not proof that every MCP/search capability is enabled.';
+    byId('slack-app-link').href = state.values.slackApp && !errors.has('slackApp') ? 'https://api.slack.com/apps/' + encodeURIComponent(state.values.slackApp) : 'https://api.slack.com/apps';
+    byId('slack-mcp-access-link').href = state.values.slackApp && !errors.has('slackApp') ? 'https://api.slack.com/apps/' + encodeURIComponent(state.values.slackApp) + '/app-assistant' : 'https://api.slack.com/apps';
+    const navigationTargets = {admin:'https://admin.microsoft.com/',slack:'https://api.slack.com/apps',oauth:'https://dev.teams.microsoft.com/tools',copilot:'https://m365.cloud.microsoft/chat',mcp:CONSTANTS.endpoint,'mcp-settings':byId('slack-mcp-access-link').href};
+    for (const link of document.querySelectorAll('[data-nav-target]')) link.href = navigationTargets[link.dataset.navTarget];
+    document.title = (state.values.orgName && !errors.has('orgName') ? state.values.orgName + ' | ' : '') + 'Slack to Copilot | MCP Setup Guide';
+    renderRunbook();
+  }
+  function localTaskIssues(task) {
+    const issues = [];
+    const missing = task.required.filter(key => !state.values[key] || errors.has(key) || (key === 'gallery' && state.values[key] === 'unknown'));
+    if (missing.length) issues.push('Add or correct: ' + missing.map(key => fieldMap.get(key).label).join(', ') + '.');
+    const invalid = task.fields.filter(key => !task.required.includes(key) && errors.has(key));
+    if (invalid.length) issues.push('Correct: ' + invalid.map(key => fieldMap.get(key).label).join(', ') + '.');
+    const unchecked = task.checks.filter(key => !state.checks[key]);
+    if (unchecked.length) issues.push('Confirm ' + unchecked.length + ' unchecked item(s).');
+    if (task.id === 'step-7') {
+      const unpassed = testIds.filter(key => state.tests[key] !== 'passed');
+      if (unpassed.length) issues.push(unpassed.length + ' test(s) still need a pass.');
+    }
+    if (state.workflow.blockers[task.id]) issues.push('Resolve and clear the blocker.');
+    return issues;
+  }
+  function taskComplete(task) { return localTaskIssues(task).length === 0; }
+  function taskStatus(task) {
+    if (state.workflow.blockers[task.id]) return {key:'blocked',label:'Blocked'};
+    if (taskComplete(task)) return {key:'complete',label:'Confirmed complete'};
+    if (task.checks.some(key => state.checks[key])) return {key:'progress',label:'In progress'};
+    return {key:'pending',label:'Not started'};
+  }
+  function taskPortal(task) {
+    const app = state.values.slackApp && !errors.has('slackApp') ? 'https://api.slack.com/apps/' + encodeURIComponent(state.values.slackApp) : 'https://api.slack.com/apps';
+    if (task.portal === 'slack-oauth') return {url:app === 'https://api.slack.com/apps' ? app : app + '/oauth',label:'Open Slack permissions'};
+    if (task.portal === 'slack') return {url:app,label:'Open Slack app settings'};
+    if (task.portal === 'oauth') return {url:'https://dev.teams.microsoft.com/tools',label:'Open OAuth registration'};
+    if (task.portal === 'copilot') return {url:'https://m365.cloud.microsoft/chat',label:'Open Microsoft Copilot'};
+    return {url:'https://admin.microsoft.com/',label:'Open Microsoft 365 admin'};
+  }
+  function buildTaskSections() {
+    for (const task of taskDefinitions) {
+      const section = byId(task.id);
+      section.querySelector('h2').setAttribute('tabindex','-1');
+      if (!section.querySelector('h2').dataset.referenceTitle) section.querySelector('h2').dataset.referenceTitle = section.querySelector('h2').textContent;
+      if (section.querySelector('.task-actions')) { buildScreenshotSlot(task,section,section.querySelector('.task-detail')); continue; }
+      const original = Array.from(section.children);
+      const actions = buildClickPath(task);
+      const detail = document.createElement('details'); detail.className = 'task-detail';
+      const summary = document.createElement('summary'); summary.textContent = 'Details & cautions'; detail.append(summary);
+      const originalActions = document.createElement('ol'); originalActions.className = 'reference-actions';
+      for (const text of task.actions) { const item = document.createElement('li'); item.textContent = text; originalActions.append(item); }
+      detail.append(originalActions);
+      for (const node of original) {
+        if (node.classList.contains('step-head') || node.classList.contains('checks')) continue;
+        const keep =
+          (task.id === 'step-2' && node.querySelector('#slack-mcp-access-link')) ||
+          (task.id === 'step-3' && (node.classList.contains('value-box') || node.classList.contains('table-wrap') || node.classList.contains('danger'))) ||
+          ((task.id === 'step-4' || task.id === 'step-5') && node.classList.contains('table-wrap')) ||
+          (task.id === 'step-5' && node.classList.contains('notice')) ||
+          (task.id === 'step-7' && (node.classList.contains('value-box') || node.classList.contains('table-wrap') || node.tagName === 'H3' || node.classList.contains('hint')));
+        if (!keep) detail.append(node);
+      }
+      section.querySelector('.step-head').after(actions);
+      section.insertBefore(detail, section.querySelector('.checks'));
+      for (const input of section.querySelectorAll('[data-check]')) {
+        const label = input.nextElementSibling; label.dataset.referenceCopy = label.textContent; label.dataset.shortCopy = shortChecks[input.dataset.check];
+      }
+      if (task.id === 'step-3') addCompactCopy(section.querySelector('.notice.danger'),'Public search covers the workspace, not just your test channel. No private, DM, file, or write grants.');
+      if (task.id === 'step-5') addCompactCopy(section.querySelector('.notice'),'Approve publisher and legal details. Default links cover Slack only, not the complete integration.');
+      if (task.id === 'step-7') {
+        for (const select of section.querySelectorAll('[data-test]')) { const cell = select.closest('tr').children[1]; cell.dataset.referenceCopy = cell.textContent; cell.dataset.shortCopy = shortTests[select.dataset.test]; }
+        const hint = section.querySelector(':scope > .hint'); if (hint) addCompactCopy(hint,'Manual results only. Not run, Failed, and Not applicable are not passes.');
+      }
+      buildScreenshotSlot(task,section,detail);
+    }
+  }
+  function addCompactCopy(node,text) {
+    if (!node || node.querySelector('.reference-copy')) return;
+    const full = document.createElement('span'); full.className = 'reference-copy';
+    while (node.firstChild) full.append(node.firstChild);
+    const short = document.createElement('span'); short.className = 'guided-copy'; short.textContent = text;
+    node.append(full,short);
+  }
+  function buildScreenshotSlot(task,section,before) {
+    const reference = referenceScreenshots[task.id];
+    if (!reference || section.querySelector('.reference-screenshot')) return;
+    if (typeof reference.src !== 'string' || !/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(reference.src)) throw new Error('Invalid embedded reference image for ' + task.id);
+    const figure = document.createElement('figure'); figure.className = 'reference-screenshot';
+    const image = document.createElement('img'); image.src = reference.src; image.alt = reference.caption || taskBriefs[task.id].image; image.decoding = 'async';
+    const caption = document.createElement('figcaption'); caption.textContent = reference.caption || taskBriefs[task.id].image;
+    image.addEventListener('error',() => { image.hidden = true; caption.textContent = 'Reference image could not be displayed. Follow the written instructions for this task.'; });
+    figure.append(image,caption); section.insertBefore(figure,before);
+  }
+  function layoutTaskFields() {
+    if (!state || printTheme !== undefined) return;
+    const task = taskById.get(state.workflow.current);
+    const inDock = state.workflow.mode === 'guided' && task && !byId('environment-panel').open;
+    const key = String(Boolean(inDock)) + ':' + (task ? task.id : 'resource');
+    if (key === fieldLayoutKey) return;
+    fieldLayoutKey = key;
+    for (const field of fields) { const control = controls.get(field.key); control.home.append(control.wrapper); }
+    byId('task-fields').replaceChildren();
+    for (const field of fields) { controls.get(field.key).wrapper.classList.remove('capture-field'); controls.get(field.key).input.removeAttribute('aria-required'); }
+    if (inDock) {
+      const optional = document.createElement('details'); optional.className = 'task-optional-fields';
+      const summary = document.createElement('summary'); summary.textContent = 'Optional values'; optional.append(summary);
+      for (const name of task.fields) {
+        const control = controls.get(name);
+        const capture = (task.id === 'step-2' && ['slackApp','slackClientId'].includes(name)) || (task.id === 'step-4' && name === 'oauthRegId');
+        control.wrapper.classList.toggle('capture-field',capture);
+        if (task.required.includes(name) || capture) { control.input.setAttribute('aria-required',String(task.required.includes(name))); byId('task-fields').append(control.wrapper); }
+        else optional.append(control.wrapper);
+      }
+      if (optional.children.length > 1) byId('task-fields').append(optional);
+    }
+    byId('task-dock').hidden = !inDock;
+  }
+  function renderRunbook() {
+    document.body.dataset.runMode = state.workflow.mode;
+    const guided = state.workflow.mode === 'guided';
+    const task = taskById.get(state.workflow.current);
+    byId('guided-mode').setAttribute('aria-pressed',String(guided));
+    byId('reference-mode').setAttribute('aria-pressed',String(!guided));
+    for (const section of document.querySelectorAll('#task-document > section.step')) section.classList.toggle('is-task-hidden',guided && section.id !== state.workflow.current);
+    for (const section of document.querySelectorAll('.task-detail')) { if (!guided) section.open = true; else if (lastRenderedMode === 'reference') section.open = false; }
+    lastRenderedMode = state.workflow.mode;
+    for (const definition of taskDefinitions) { const heading = byId(definition.id).querySelector('h2'); heading.textContent = guided ? definition.title : heading.dataset.referenceTitle; }
+    for (const node of document.querySelectorAll('[data-reference-copy]')) node.textContent = guided ? node.dataset.shortCopy : node.dataset.referenceCopy;
+    for (const link of document.querySelectorAll('.jump-nav a')) {
+      const id = link.getAttribute('href').slice(1);
+      if (guided) id === state.workflow.current ? link.setAttribute('aria-current','location') : link.removeAttribute('aria-current');
+      if (taskById.has(id)) { const status = taskStatus(taskById.get(id)); link.dataset.state = status.key; link.querySelector('[data-task-state]').textContent = status.label; }
+    }
+    const completed = taskDefinitions.filter(taskComplete).length;
+    byId('personalize-button').textContent = taskDefinitions.some(definition => definition.checks.some(key => state.checks[key])) || Object.keys(state.workflow.blockers).length ? 'Resume guided setup' : 'Start guided setup';
+    const activeLabel = task ? task.title : state.workflow.current === 'step-8' ? 'Troubleshoot' : state.workflow.current === 'capabilities' ? 'Tools and scopes' : 'Official sources';
+    byId('task-menu-toggle').textContent = activeLabel + ' · ' + completed + '/' + taskDefinitions.length + ' complete';
+    byId('progress-label').textContent = completed + ' / ' + taskDefinitions.length + ' tasks complete';
+    byId('progress-fill').style.width = Math.round(completed / taskDefinitions.length * 100) + '%';
+    byId('progress').setAttribute('aria-valuenow',String(Math.round(completed / taskDefinitions.length * 100)));
+    document.querySelector('.run-workarea').classList.toggle('resource-active',!task);
+    byId('task-launch').hidden = !task || !guided;
+    byId('task-values-title').textContent = 'Task values';
+    byId('previous-task').hidden = !task;
+    byId('block-task').hidden = !task;
+    byId('next-task').hidden = !task;
+    byId('return-to-task').hidden = Boolean(task);
+    byId('task-exit').hidden = !guided;
+    byId('blocker-editor').hidden = !task || !state.workflow.blockers[task.id];
+    if (task) {
+      const portal = taskPortal(task);
+      byId('task-role').textContent = task.role;
+      byId('task-location').textContent = task.location;
+      byId('task-portal').href = portal.url; byId('task-portal').textContent = portal.label;
+      byId('task-expected').textContent = taskBriefs[task.id].expected;
+      const index = taskDefinitions.indexOf(task);
+      const issues = localTaskIssues(task);
+      const prior = taskDefinitions.slice(0,index).filter(previous => !taskComplete(previous));
+      if (prior.length) issues.unshift('Finish earlier tasks: ' + prior.map(previous => previous.id.replace('step-','')).join(', ') + '.');
+      byId('task-gate').textContent = issues.length ? issues.join(' ') : 'Confirmed by you. Ready to continue.';
+      byId('task-gate').dataset.state = state.workflow.blockers[task.id] ? 'blocked' : issues.length ? 'pending' : 'ready';
+      byId('previous-task').disabled = index === 0;
+      byId('next-task').disabled = issues.length > 0;
+      byId('next-task').textContent = index === taskDefinitions.length - 1 ? 'Export completed run' : 'Continue';
+      const next = nextTaskRequirement(task);
+      byId('fix-task-gate').hidden = !next;
+      if (next) byId('fix-task-gate').textContent = next.label;
+      byId('blocker-reason').value = state.workflow.blockers[task.id] || '';
+      byId('block-task').textContent = state.workflow.blockers[task.id] ? 'Task is blocked' : "I'm blocked";
+    } else {
+      byId('task-expected').textContent = 'Review the resource, then return to your task.';
+      byId('task-gate').textContent = 'Resume: ' + taskById.get(state.workflow.lastTask).title + '.';
+      byId('task-gate').dataset.state = 'pending';
+      byId('fix-task-gate').hidden = true;
+    }
+    layoutTaskFields();
+  }
+  function navigateRunbook(id, focus = true) {
+    if (!allowedViews.has(id)) return;
+    state.workflow.current = id;
+    byId('task-menu-toggle').setAttribute('aria-expanded','false');
+    if (taskById.has(id)) state.workflow.lastTask = id;
+    renderRunbook();
+    if (focus) {
+      const section = byId(id); section.scrollIntoView({block:'start'});
+      const heading = section.querySelector('h2'); heading.setAttribute('tabindex','-1'); heading.focus({preventScroll:true});
+    }
+  }
+  function nextTaskRequirement(task) {
+    const index = taskDefinitions.indexOf(task);
+    const prior = taskDefinitions.slice(0,index).find(previous => !taskComplete(previous));
+    if (prior) return {kind:'task',key:prior.id,label:'Return to task ' + (taskDefinitions.indexOf(prior)+1)};
+    const missing = task.required.find(key => !state.values[key] || errors.has(key) || (key === 'gallery' && state.values[key] === 'unknown')) || task.fields.find(key => errors.has(key));
+    if (missing) return {kind:'field',key:missing,label:'Enter ' + fieldMap.get(missing).label.toLowerCase()};
+    const unchecked = task.checks.find(key => !state.checks[key]);
+    if (unchecked) return {kind:'check',key:unchecked,label:'Go to next confirmation'};
+    if (task.id === 'step-7') { const test = testIds.find(key => state.tests[key] !== 'passed'); if (test) return {kind:'test',key:test,label:'Review ' + test + ' test'}; }
+    if (state.workflow.blockers[task.id]) return {kind:'blocker',label:'Resolve recorded blocker'};
+    return null;
+  }
+  function focusRunItem(input) {
+    for (let ancestor = input.parentElement; ancestor; ancestor = ancestor.parentElement) if (ancestor.tagName === 'DETAILS') ancestor.open = true;
+    input.scrollIntoView({block:'center'}); input.focus({preventScroll:true});
+  }
+  function exportRunSummary() {
+    if (errors.size) { notify('Fix invalid values before exporting a run summary.'); return; }
+    const record = {
+      format:'slack-copilot-run-summary-v1', exportedAt:new Date().toISOString(),
+      verification:'Operator-reported only. This file makes no cloud calls and does not certify production readiness.',
+      baseline:'Public-channel retrieval; no additional scopes granted by this report.',
+      overallStatus:taskDefinitions.every(taskComplete) ? 'All baseline tasks and tests confirmed by the operator' : 'Incomplete - review pending tasks and tests',
+      incompleteTasks:taskDefinitions.filter(task => !taskComplete(task)).map(task => task.title),
+      resumeAt:state.workflow.lastTask,
+      endpoint:CONSTANTS.endpoint, microsoftPortalScopes:CONSTANTS.scopes,
+      values:{...state.values},
+      tasks:taskDefinitions.map(task => ({task:task.title,status:taskStatus(task).label,blocker:state.workflow.blockers[task.id] || null,checkpoints:Object.fromEntries(task.checks.map(key => [key,Boolean(state.checks[key])]))})),
+      tests:{...state.tests},
+      limitations:testIds.filter(key => state.tests[key] !== 'passed'),
+      screenshotTasks:Object.keys(referenceScreenshots),
+      screenshotImagesIncluded:false,
+      additionalCapabilities:'https://docs.slack.dev/ai/slack-mcp-server/#oauth-scopes'
+    };
+    const blob = new Blob([JSON.stringify(record,null,2)],{type:'application/json;charset=utf-8'});
+    const url = URL.createObjectURL(blob); const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = 'slack-copilot-run-summary.json'; document.body.append(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url),30000);
+    notify('Run summary download requested. It includes internal non-secret identifiers and manual outcomes; review before sharing.');
+  }
+  function applyState(next) {
+    state = next;
+    for (const field of fields) controls.get(field.key).input.value = state.values[field.key];
+    render();
+  }
+  function manualCopy(text) {
+    byId('copy-buffer').value = text; byId('copy-dialog').showModal(); byId('copy-buffer').focus(); byId('copy-buffer').select();
+  }
+  async function copy(text) {
+    if (!navigator.clipboard || !navigator.clipboard.writeText) { manualCopy(text); return; }
+    try { await navigator.clipboard.writeText(text); notify('Copied. Paste into the appropriate portal field.'); }
+    catch { manualCopy(text); }
+  }
+  function exportHtml() {
+    if (errors.size) { notify('Fix invalid values before downloading.'); return; }
+    const root = document.documentElement.cloneNode(true);
+    root.querySelector('#embedded-state').textContent = JSON.stringify(state).replace(/</g,'\\u003c').replace(/>/g,'\\u003e').replace(/&/g,'\\u0026').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+    root.querySelector('#status').textContent = '';
+    root.querySelector('#copy-dialog').removeAttribute('open'); root.querySelector('#copy-buffer').textContent = '';
+    root.querySelector('#reset-panel').hidden = true;
+    root.querySelector('#profile-fields').replaceChildren();
+    root.querySelector('#task-fields').replaceChildren();
+    for (const image of root.querySelectorAll('.reference-screenshot')) image.remove();
+    for (const id of ['oauth-table','connector-table']) root.querySelector('#' + id + ' tbody').replaceChildren();
+    for (const select of root.querySelectorAll('[data-test]')) select.replaceChildren();
+    const blob = new Blob(['<!DOCTYPE html>\n' + root.outerHTML], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob); const anchor = document.createElement('a');
+    const slug = (state.values.orgName || 'customer').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60) || 'customer';
+    anchor.href = url; anchor.download = slug + '-slack-copilot-guide.html'; document.body.append(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 30000);
+    notify('HTML download requested. Values, progress, and any reference images are included; review before sharing.');
+  }
+  makeFields();
+  buildTaskSections();
+  byId('task-document').append(byId('task-exit'));
+  buildTable('oauth-table', [
+    ['Registration name','oauthName'],['Base URL (if shown)','endpoint','Use the same hosted MCP endpoint as the connector.'],['Restrict usage by org','orgRestriction'],['Restrict usage by app','appRestriction'],['Client ID','clientId','Slack Basic Information > App Credentials. Client Secret goes directly into the portal, never here.'],['Authorization endpoint','authorization'],['Token endpoint','token'],['Refresh endpoint','token'],['Scope','scopes'],['Enable PKCE','pkce','Lab choice, not a general production recommendation.'],['Client password authentication method','clientAuth']
+  ]);
+  buildTable('connector-table', [
+    ['Display name','connectorName'],['Description','description'],['MCP endpoint URL','endpoint'],['Developer name','developer','Default identifies the Slack-hosted service. Review actual publisher details.'],['Website URL','website'],['Privacy policy URL','privacy','Source-service reference by default; review full integration coverage.'],['Terms of use URL','terms'],['Authentication type','auth'],['OAuth registration ID','registration','Generated by Microsoft, not a Slack App ID or Slack Client ID.']
+  ]);
+  for (const select of document.querySelectorAll('[data-test]')) {
+    for (const [key,label] of testOptions) { const option = document.createElement('option'); option.value = key; option.textContent = label; select.append(option); }
+    select.addEventListener('change', () => { state.tests[select.dataset.test] = select.value; render(); });
+  }
+  for (const input of document.querySelectorAll('[data-check]')) input.addEventListener('change', () => { state.checks[input.dataset.check] = input.checked; render(); });
+  document.addEventListener('click', event => { const button = event.target.closest('button[data-copy]'); if (button && !button.disabled) copy(copyValues()[button.dataset.copy]); });
+  byId('close-copy').addEventListener('click', () => byId('copy-dialog').close());
+  byId('download-button').addEventListener('click', exportHtml);
+  byId('personalize-button').addEventListener('click', () => {
+    state.workflow.mode = 'guided'; byId('environment-panel').open = false;
+    const next = taskDefinitions.find(task => state.workflow.blockers[task.id]) || taskDefinitions.find(task => !taskComplete(task)) || taskDefinitions[taskDefinitions.length - 1];
+    navigateRunbook(next.id);
+  });
+  byId('all-values-button').addEventListener('click', () => { const panel = byId('environment-panel'); panel.open = !panel.open; layoutTaskFields(); if (panel.open) { panel.scrollIntoView({block:'start'}); byId('input-orgName').focus({preventScroll:true}); } });
+  byId('environment-panel').addEventListener('toggle',layoutTaskFields);
+  byId('task-values-button').addEventListener('click', () => { const task = taskById.get(state.workflow.current); if (!task) return; byId('environment-panel').open = false; layoutTaskFields(); const key = task.required.find(name => !state.values[name] || errors.has(name)) || task.fields[0]; focusRunItem(controls.get(key).input); });
+  byId('fix-task-gate').addEventListener('click', () => {
+    const task = taskById.get(state.workflow.current); if (!task) return;
+    const next = nextTaskRequirement(task); if (!next) return;
+    if (next.kind === 'task') { navigateRunbook(next.key); return; }
+    if (next.kind === 'field') { byId('environment-panel').open = false; layoutTaskFields(); focusRunItem(controls.get(next.key).input); return; }
+    if (next.kind === 'check') { focusRunItem(document.querySelector('[data-check="' + next.key + '"]')); return; }
+    if (next.kind === 'test') { focusRunItem(document.querySelector('[data-test="' + next.key + '"]')); return; }
+    byId('blocker-editor').hidden = false; focusRunItem(byId('blocker-reason'));
+  });
+  byId('save-progress-button').addEventListener('click', () => byId('save-button').click());
+  byId('handoff-button').addEventListener('click',exportRunSummary);
+  byId('guided-mode').addEventListener('click', () => { state.workflow.mode = 'guided'; byId('environment-panel').open = false; renderRunbook(); });
+  byId('task-menu-toggle').addEventListener('click', () => { const button = byId('task-menu-toggle'); button.setAttribute('aria-expanded', String(button.getAttribute('aria-expanded') !== 'true')); });
+  byId('reference-mode').addEventListener('click', () => { state.workflow.mode = 'reference'; renderRunbook(); });
+  document.querySelector('.jump-nav').addEventListener('click',event => { const link = event.target.closest('a[href^="#"]'); if (!link) return; event.preventDefault(); navigateRunbook(link.getAttribute('href').slice(1)); });
+  document.querySelector('.cover-actions a').addEventListener('click',event => { event.preventDefault(); navigateRunbook('capabilities'); });
+  byId('previous-task').addEventListener('click', () => { const index = taskDefinitions.findIndex(task => task.id === state.workflow.current); if (index > 0) navigateRunbook(taskDefinitions[index-1].id); });
+  byId('next-task').addEventListener('click', () => { if (byId('next-task').disabled) return; const index = taskDefinitions.findIndex(task => task.id === state.workflow.current); index < taskDefinitions.length-1 ? navigateRunbook(taskDefinitions[index+1].id) : exportRunSummary(); });
+  byId('block-task').addEventListener('click', () => { const task = taskById.get(state.workflow.current); if (!task) return; state.workflow.blockers[task.id] = state.workflow.blockers[task.id] || 'other'; renderRunbook(); byId('blocker-reason').focus(); });
+  byId('blocker-reason').addEventListener('change', () => { const task = taskById.get(state.workflow.current); if (!task) return; if (blockerOptions.has(byId('blocker-reason').value)) state.workflow.blockers[task.id] = byId('blocker-reason').value; else delete state.workflow.blockers[task.id]; renderRunbook(); });
+  byId('clear-blocker').addEventListener('click', () => { delete state.workflow.blockers[state.workflow.lastTask]; renderRunbook(); });
+  byId('diagnose-button').addEventListener('click', () => navigateRunbook('step-8'));
+  byId('return-to-task').addEventListener('click', () => navigateRunbook(state.workflow.lastTask));
+  byId('theme-button').addEventListener('click', () => document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+  byId('print-button').addEventListener('click', () => window.print());
+  window.addEventListener('beforeprint', () => { if (printTheme !== undefined) return; printTheme = document.documentElement.getAttribute('data-theme'); document.documentElement.setAttribute('data-theme','light'); printDetails = Array.from(document.querySelectorAll('main details'), node => [node,node.open]); for (const [node] of printDetails) node.open = true; printCopy = Array.from(document.querySelectorAll('[data-reference-copy]'),node => [node,node.textContent]); for (const [node] of printCopy) node.textContent = node.dataset.referenceCopy; });
+  window.addEventListener('afterprint', () => { if (printTheme === undefined) return; document.documentElement.setAttribute('data-theme',printTheme); for (const [node,open] of printDetails) node.open = open; for (const [node,text] of printCopy) node.textContent = text; printTheme = undefined; printDetails = []; printCopy = []; });
+  byId('save-button').addEventListener('click', () => {
+    if (errors.size) { notify('Fix invalid values before saving.'); return; }
+    try { localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }
+    catch { notify('Device save is unavailable in this browser context. Download a personalized HTML copy to keep your progress.'); return; }
+    notify('Values and progress saved on this browser/device only. Other downloaded copies are unchanged.');
+  });
+  byId('restore-button').addEventListener('click', () => {
+    let text;
+    try { text = localStorage.getItem(STORAGE_KEY); }
+    catch { notify('Device storage is unavailable. Open your personalized downloaded copy instead.'); return; }
+    if (!text) { notify('No device save found. Your current entries are unchanged.'); return; }
+    let next;
+    try { next = safeState(JSON.parse(text)); }
+    catch (error) { notify('Could not restore the device save: ' + error.message); return; }
+    applyState(next); notify('Device save restored. Review the tenant and pilot identity before using these values.');
+  });
+  byId('forget-button').addEventListener('click', () => { try { localStorage.removeItem(STORAGE_KEY); } catch { notify('Could not access device storage. No cloud resources were changed.'); return; } notify('Device save removed. Current on-screen entries and downloaded copies are unchanged.'); });
+  byId('reset-button').addEventListener('click', () => { byId('reset-panel').hidden = false; byId('confirm-reset').focus(); });
+  byId('cancel-reset').addEventListener('click', () => { byId('reset-panel').hidden = true; byId('reset-button').focus(); });
+  byId('confirm-reset').addEventListener('click', () => {
+    let storageFailed = false; try { localStorage.removeItem(STORAGE_KEY); } catch { storageFailed = true; }
+    applyState(blankState()); byId('reset-panel').hidden = true;
+    notify(storageFailed ? 'On-screen values reset. Device storage could not be cleared; existing downloads are unchanged.' : 'Guide reset to a blank customer template. Device save cleared; existing downloads and cloud resources are unchanged.');
+  });
+  const embedded = byId('embedded-state').textContent;
+  let initial = blankState();
+  try { const parsed = JSON.parse(embedded); if (Object.keys(parsed).length) initial = safeState(parsed); }
+  catch (error) { notify('Embedded profile could not be loaded: ' + error.message + ' Start with the visible blank template.'); }
+  initial.workflow.mode = 'reference';
+  applyState(initial);
+  if ('IntersectionObserver' in window) {
+    const chapters = Array.from(document.querySelectorAll('main section.step'));
+    const links = Array.from(document.querySelectorAll('.jump-nav a'));
+    const visible = new Set();
+    const observer = new IntersectionObserver(entries => {
+      if (state.workflow.mode === 'guided') return;
+      for (const entry of entries) entry.isIntersecting ? visible.add(entry.target.id) : visible.delete(entry.target.id);
+      const current = chapters.find(chapter => { const rect = chapter.getBoundingClientRect(); return rect.top <= 144 && rect.bottom > 144; }) || chapters.find(chapter => visible.has(chapter.id));
+      if (!current) return;
+      for (const link of links) link.getAttribute('href') === '#' + current.id ? link.setAttribute('aria-current','location') : link.removeAttribute('aria-current');
+    }, {rootMargin:'-100px 0px -35% 0px',threshold:0});
+    chapters.forEach(chapter => observer.observe(chapter));
+  }
+})();
+</script>
+</body>
+</html>
