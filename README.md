@@ -1,6 +1,6 @@
 # Slack to Copilot
 
-Connect Slack to Microsoft Copilot without building or hosting an MCP server.
+Connect Slack to Microsoft Copilot using [Slack's hosted MCP server](https://docs.slack.dev/ai/slack-mcp-server/#overview). No custom MCP server to build or host.
 
 A browser-based runbook for IT admins: follow the exact clicks, copy tenant-specific configuration, and verify that Copilot can retrieve and cite Slack messages.
 
