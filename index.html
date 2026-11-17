@@ -570,12 +570,21 @@ body[data-run-mode="guided"] .task-document > .task-exit { margin-top: .75rem; p
 body[data-run-mode="reference"] #personalize-button { display: inline-flex; align-items: center; gap: .9rem; min-height: 48px; font-size: 1rem; padding: .7rem 1.15rem; }
 body[data-run-mode="reference"] #personalize-button::after { content: ""; width: .5rem; height: .5rem; border-top: 2px solid currentColor; border-right: 2px solid currentColor; transform: rotate(45deg); }
 body[data-run-mode="reference"] .cover-actions { align-items: center; }
-.mode-switch { --cp-guided-bg: #b11f4b; --cp-guided-hover: #95143d; --cp-guided-fg: #ffffff; }
-html[data-theme="dark"] .mode-switch { --cp-guided-bg: #fd8ea1; --cp-guided-hover: #ffa9b8; --cp-guided-fg: #2b2023; }
-body[data-run-mode] #guided-mode { background: var(--cp-guided-bg); color: var(--cp-guided-fg); border: 1px solid var(--cp-guided-bg); margin-left: .35rem; font-weight: 650; }
-body[data-run-mode] #guided-mode:hover { background: var(--cp-guided-hover); border-color: var(--cp-guided-hover); }
-body[data-run-mode] #guided-mode[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--cp-guided-fg); }
-body[data-run-mode] #guided-mode:focus-visible { outline: 3px solid var(--cp-text); outline-offset: 3px; }
+:root { --cp-guided-bg: #b11f4b; --cp-guided-hover: #95143d; --cp-guided-fg: #ffffff; }
+html[data-theme="dark"] { --cp-guided-bg: #fd8ea1; --cp-guided-hover: #ffa9b8; --cp-guided-fg: #2b2023; }
+.mode-switch { gap: .35rem; flex-wrap: wrap; }
+body[data-run-mode] .mode-switch button { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; min-height: 42px; margin: 0; background: var(--cp-surface); color: var(--cp-text); border: 1px solid var(--cp-border-strong); box-shadow: none; font-weight: 600; }
+body[data-run-mode] .mode-switch button:hover { background: var(--cp-surface-soft); }
+body[data-run-mode] .mode-switch button[aria-pressed="true"] { background: var(--cp-guided-bg); color: var(--cp-guided-fg); border-color: var(--cp-guided-bg); }
+body[data-run-mode] .mode-switch button[aria-pressed="true"]:hover { background: var(--cp-guided-hover); border-color: var(--cp-guided-hover); }
+body[data-run-mode] #guided-mode[aria-pressed="false"] { color: var(--cp-guided-bg); border-color: var(--cp-guided-bg); }
+html[data-theme="dark"] body[data-run-mode] #guided-mode[aria-pressed="false"] { color: var(--cp-text); }
+.mode-check { display: none; flex: 0 0 14px; width: 14px; height: 14px; }
+.mode-badge { display: none; font-size: .65rem; line-height: 1.4; padding: .08rem .3rem; border: 1px solid currentColor; border-radius: 4px; }
+.mode-switch button[aria-pressed="true"] .mode-check, .mode-switch button[aria-pressed="true"] .mode-badge { display: block; }
+body[data-run-mode] .mode-switch button:focus-visible { outline: 3px solid var(--cp-text); outline-offset: 3px; }
+body[data-run-mode] #personalize-button { background: var(--cp-guided-bg); color: var(--cp-guided-fg); border-color: var(--cp-guided-bg); }
+body[data-run-mode] #personalize-button:hover { background: var(--cp-guided-hover); border-color: var(--cp-guided-hover); }
 body[data-run-mode="guided"] .guided-path-note { display: none; }
 .cover-disclaimer { color: var(--cp-cover-muted); font-size: .78rem; margin: -.35rem 0 1rem; }
 @media (max-width: 640px) { body[data-run-mode="reference"] .cover-actions { align-items: flex-start; flex-direction: column; gap: .8rem; }body[data-run-mode="reference"] #personalize-button { width: 100%; justify-content: space-between; } }
@@ -630,7 +639,7 @@ body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
 </aside>
 <main id="guide">
 <div class="run-toolbar" aria-label="Runbook controls">
-  <div class="mode-switch" role="group" aria-label="Guide viewing mode"><button id="reference-mode" type="button" aria-pressed="true">Full reference</button><button id="guided-mode" type="button" aria-pressed="false">Guided setup</button></div>
+  <div class="mode-switch" role="group" aria-label="Guide viewing mode"><button id="reference-mode" type="button" aria-pressed="true"><svg class="mode-check" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8 3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="reference-mode-label">Full reference</span><span class="mode-badge">Current</span></button><button id="guided-mode" type="button" aria-pressed="false"><svg class="mode-check" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8 3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="guided-mode-label">Switch to guided setup</span><span class="mode-badge">Current</span></button></div>
   <div class="run-toolbar-actions"><button id="all-values-button" type="button" aria-controls="environment-panel">All values</button><button id="save-progress-button" type="button">Save progress</button><button id="handoff-button" type="button">Export run summary</button></div>
 </div>
 <p class="run-save-note">Manual checklist. No tenant changes. Save to keep progress. Explanations stay in Full reference.</p>
@@ -1308,6 +1317,8 @@ body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
     const task = taskById.get(state.workflow.current);
     byId('guided-mode').setAttribute('aria-pressed',String(guided));
     byId('reference-mode').setAttribute('aria-pressed',String(!guided));
+    byId('guided-mode-label').textContent = guided ? 'Guided setup' : 'Switch to guided setup';
+    byId('reference-mode-label').textContent = guided ? 'Switch to full reference' : 'Full reference';
     for (const section of document.querySelectorAll('#task-document > section.step')) section.classList.toggle('is-task-hidden',guided && section.id !== state.workflow.current);
     for (const section of document.querySelectorAll('.task-detail')) { if (!guided) section.open = true; else if (lastRenderedMode === 'reference') section.open = false; }
     lastRenderedMode = state.workflow.mode;
