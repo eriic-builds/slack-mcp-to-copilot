@@ -586,7 +586,10 @@ body[data-run-mode] .mode-switch button:focus-visible { outline: 3px solid var(-
 body[data-run-mode] #personalize-button { background: var(--cp-guided-bg); color: var(--cp-guided-fg); border-color: var(--cp-guided-bg); }
 body[data-run-mode] #personalize-button:hover { background: var(--cp-guided-hover); border-color: var(--cp-guided-hover); }
 body[data-run-mode="guided"] .guided-path-note { display: none; }
-.cover-disclaimer { color: var(--cp-cover-muted); font-size: .78rem; margin: -.35rem 0 1rem; }
+.community-disclaimer { margin: 0; padding: .65rem max(1rem, calc((100vw - 1400px) / 2)); background: var(--cp-bg-elevated); color: var(--cp-text-muted); font-size: .8rem; line-height: 1.6; text-align: center; }
+.community-disclaimer-top { border-bottom: 1px solid var(--cp-border); }
+.community-disclaimer-bottom { border-top: 1px solid var(--cp-border); margin-top: 1rem; }
+.community-disclaimer a { white-space: nowrap; }
 @media (max-width: 640px) { body[data-run-mode="reference"] .cover-actions { align-items: flex-start; flex-direction: column; gap: .8rem; }body[data-run-mode="reference"] #personalize-button { width: 100%; justify-content: space-between; } }
 @media print { .guided-path-note { display: none; } }
 </style>
@@ -607,6 +610,7 @@ body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
 </head>
 <body>
 <a class="skip-link" href="#guide">Skip to the guide</a>
+<p class="community-disclaimer community-disclaimer-top">Unofficial community resource. Not affiliated with Microsoft. &middot; <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors" target="_blank" rel="noopener noreferrer">Microsoft Learn</a></p>
 <header class="topbar">
   <div class="brand"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3" y="4" width="17" height="22" rx="5" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="8" width="17" height="22" rx="5" stroke="currentColor" stroke-width="1.5"/></svg><div>Microsoft Copilot<span>Slack MCP Connector to Copilot / Implementation Guide</span></div></div>
   <div class="actions">
@@ -619,7 +623,6 @@ body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
   <div class="cover-copy">
     <h1 id="page-title">Bring Slack context<br><em>into Copilot.</em></h1>
     <p class="lede">Set up a read-only Slack pilot. Copy, configure, confirm.</p>
-    <p class="cover-disclaimer">Independent community guide. Not an official Microsoft or Slack product.</p>
     <div class="cover-actions"><button id="personalize-button" class="primary" type="button">Start guided setup</button><a href="#capabilities">Additional MCP tools &amp; scopes</a></div>
     <p class="guided-path-note">Prefer step-by-step? Guided setup gives you one task, its values, and checks.</p>
     <p class="cover-meta">Prepared for <strong data-bind="orgName">[Your organization]</strong> &middot; Read-only, public-channel pilot</p>
@@ -816,9 +819,10 @@ body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
   <div class="blocker-editor" id="blocker-editor" hidden><label for="blocker-reason">What is blocking this task?</label><select id="blocker-reason"><option value="">Select a reason</option><option value="approval">Waiting for access or approval</option><option value="identifier">Missing or incorrect configuration value</option><option value="oauth">OAuth or consent error</option><option value="discovery">Tool discovery failure</option><option value="verification">Verification result needs investigation</option><option value="other">Another issue - review troubleshooting</option></select><p class="hint">Record only the category here. Do not paste tokens, diagnostic dumps, or private customer content.</p><button id="clear-blocker" type="button">Clear blocker</button><button id="diagnose-button" type="button">Open troubleshooting</button></div>
   <div class="task-footer-actions"><button id="previous-task" type="button">Previous task</button><button id="block-task" type="button">I'm blocked</button><button id="return-to-task" type="button" hidden>Back to setup task</button><button id="next-task" class="primary" type="button">Continue</button></div>
 </section>
-<footer>Independent community guide; not an official Microsoft or Slack product. This static page does not send entered setup values to a server. Explicit device saves stay in your browser; downloaded copies can contain internal tenant names and non-secret IDs. Do not enter credentials. GitHub serves this site and handles hosting request data under its <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">privacy statement</a>. There are no added analytics, external scripts, live API calls, or remote assets. Opening a portal or documentation link leaves this guide. Review saved copies before sharing.</footer>
+<footer>This static page does not send entered setup values to a server. Explicit device saves stay in your browser; downloaded copies can contain internal tenant names and non-secret IDs. Do not enter credentials. GitHub serves this site and handles hosting request data under its <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">privacy statement</a>. There are no added analytics, external scripts, live API calls, or remote assets. Opening a portal or documentation link leaves this guide. Review saved copies before sharing.</footer>
 </main>
 </div>
+<p class="community-disclaimer community-disclaimer-bottom">Unofficial community resource. Not affiliated with Microsoft. &middot; <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors" target="_blank" rel="noopener noreferrer">Microsoft Learn</a></p>
 <div id="status" role="status" aria-live="polite"></div>
 <dialog id="copy-dialog" aria-labelledby="copy-title"><h2 id="copy-title">Copy manually</h2><p>Clipboard access is unavailable in this browser context. Select the text below and press Ctrl+C (or Command+C).</p><textarea id="copy-buffer" readonly aria-label="Text to copy"></textarea><button id="close-copy" type="button">Close</button></dialog>
 <noscript><div class="notice danger">JavaScript is disabled. Read the static steps, but personalization, copy buttons, progress, and downloads require JavaScript. Open the downloaded file in Edge or Chrome with JavaScript enabled.</div></noscript>
