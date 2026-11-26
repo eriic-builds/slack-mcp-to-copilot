@@ -640,6 +640,14 @@ body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
   --cp-nav-ready: #7d5063;
   --cp-nav-slack: #8251d0;
   --cp-nav-microsoft: #2174cf;
+  --cp-logo-slack-red: #e01e5a;
+  --cp-logo-slack-blue: #36c5f0;
+  --cp-logo-slack-green: #2eb67d;
+  --cp-logo-slack-yellow: #ecb22e;
+  --cp-logo-microsoft-red: #f25022;
+  --cp-logo-microsoft-green: #7fba00;
+  --cp-logo-microsoft-blue: #00a4ef;
+  --cp-logo-microsoft-yellow: #ffb900;
   --cp-nav-reference: #cf7900;
   --cp-heading-font: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
   --cp-shadow: 0 8px 24px rgba(0, 0, 0, .08);
@@ -711,30 +719,33 @@ body[data-run-mode="reference"] #personalize-button { min-height: 42px; font-siz
 .map-node strong { font-size: .8rem; font-weight: 500; color: var(--cp-text); }
 .map-node small { font-size: .69rem; line-height: 1.5; }
 .layout, body[data-run-mode="guided"] .layout { max-width: 1480px; grid-template-columns: 196px minmax(0, 1fr); gap: 48px; padding: 1rem 2rem 3rem; }
-.toc { top: 7rem; max-height: none; overflow: visible; padding: .25rem .5rem .5rem 0; }
+.toc { top: var(--nav-rail-inset, 7rem); max-height: none; overflow: visible; padding: .25rem .5rem .5rem 0; }
 .toc.is-page-flow { position: static; }
 @media (max-height: 620px) and (min-width: 1001px) { .toc { position: static; } }
 .toc-heading { display: none; }
-.jump-nav { display: block; margin: 0 0 1.5rem; }
-.nav-group { --cp-branch: var(--cp-nav-ready); margin: 0 0 1rem; }
+.jump-nav { display: block; margin: 0; }
+.nav-group { --cp-branch: var(--cp-nav-ready); margin: 0 0 1.5rem; }
+.nav-group:last-child { margin-bottom: 0; }
 .nav-group[data-nav-group="slack"] { --cp-branch: var(--cp-nav-slack); }
 .nav-group[data-nav-group="microsoft"] { --cp-branch: var(--cp-nav-microsoft); }
 .nav-group[data-nav-group="reference"] { --cp-branch: var(--cp-nav-reference); }
-.nav-group-title { display: flex; align-items: center; gap: .65rem; margin: 0 0 .35rem; font-size: .8rem; font-weight: 500; color: var(--cp-text-muted); transition: color 300ms ease; }
+.nav-group-title { display: flex; align-items: center; gap: .45rem; margin: 0 0 .35rem; font-size: .8rem; font-weight: 500; color: var(--cp-text-muted); transition: color 300ms ease; }
 .nav-group-title svg { width: 16px; height: 16px; flex: 0 0 16px; color: var(--cp-border-strong); transition: color 300ms ease; }
 .nav-group[data-active="true"] .nav-group-title { color: var(--cp-text); }
-.nav-group[data-active="true"] .nav-group-title svg { color: var(--cp-branch); }
-.nav-branches { position: relative; margin-left: 7px; }
-.nav-trace { position: absolute; z-index: 1; left: 0; top: 0; width: 14px; height: var(--nav-trace-height, 0px); border: solid var(--cp-branch); border-width: 0 0 1px 1px; border-bottom-left-radius: 7px; pointer-events: none; opacity: 0; transition: height 420ms cubic-bezier(.22, 1, .36, 1), opacity 220ms ease; }
-.nav-trace::after { content: ""; position: absolute; width: 5px; height: 5px; right: -2px; bottom: -3px; border-radius: 50%; background: var(--cp-branch); }
-.nav-group[data-active="true"] .nav-trace { opacity: 1; }
-.jump-nav .nav-branches a { position: relative; display: block; min-height: 30px; padding: .25rem 0 .25rem 21px; border: 0; border-radius: 0; background: none; font-size: .8rem; color: var(--cp-text-muted); line-height: 1.65; transition: color 180ms ease; }
+.nav-group[data-active="true"] .nav-group-title svg:not(.nav-brand-icon) { color: var(--cp-branch); }
+.nav-brand-icon > * { transition: fill 300ms ease; }
+.nav-group[data-active="true"] .nav-brand-icon > * { fill: var(--cp-logo-fill, currentColor); }
+.nav-branches { --nav-bend: 7px; position: relative; margin-inline-start: 7px; }
+.nav-trace { position: absolute; z-index: 1; left: 0; top: 0; width: 14px; height: 100%; overflow: visible; pointer-events: none; visibility: hidden; color: var(--cp-branch); }
+.nav-group[data-active="true"] .nav-trace { visibility: visible; }
+.nav-trace path { fill: none; stroke: currentColor; stroke-width: 1px; stroke-dasharray: 1; }
+.nav-trace circle { fill: currentColor; transform-box: fill-box; transform-origin: center; }
+.jump-nav .nav-branches a { position: relative; display: block; min-height: 28px; padding: .25rem 0 .25rem 17px; border: 0; border-radius: 0; background: none; font-size: .8rem; color: var(--cp-text-muted); line-height: 1.5; transition: color 180ms ease; }
 .nav-branches a::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--cp-border); }
-.nav-branches a:last-child::before { bottom: 50%; }
-.nav-branches a::after { content: ""; position: absolute; left: 0; top: calc(50% - 8px); width: 12px; height: 8px; border: solid var(--cp-border); border-width: 0 0 1px 1px; border-bottom-left-radius: 7px; }
-.jump-nav a:hover { color: var(--cp-text); background: none; }
-.jump-nav a[aria-current="location"] { color: var(--cp-text); background: none; font-weight: 600; }
-.jump-nav a[aria-current="location"]::after { border-color: var(--cp-branch); }
+.nav-branches a:last-child::before { bottom: calc(50% + var(--nav-bend)); }
+.nav-branches a::after { content: ""; position: absolute; box-sizing: border-box; left: 0; top: calc(50% - var(--nav-bend)); width: 11px; height: calc(var(--nav-bend) + 1px); border: solid var(--cp-border); border-width: 0 0 1px 1px; border-bottom-left-radius: 6px; pointer-events: none; }
+.jump-nav .nav-branches a:hover { color: var(--cp-text); }
+.jump-nav .nav-branches a[aria-current="location"] { color: var(--cp-text); font-weight: 500; }
 .nav-title { font-size: .8rem !important; color: inherit !important; }
 .nav-title small, .jump-nav a[data-state="complete"] .nav-title small, .jump-nav a[data-state="blocked"] .nav-title small { display: block; position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .journey-status { padding: .8rem 0; font-size: .72rem; }
@@ -862,7 +873,7 @@ body[data-run-mode="guided"] .task-document > .task-exit { margin-top: .75rem; p
   .mode-switch { gap: .35rem; }
 }
 @media (max-width: 420px) { body[data-run-mode] .jump-nav { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce) { .nav-trace, .nav-group-title, .nav-group-title svg, .jump-nav a, .step.is-reading .step-number { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .nav-group-title, .nav-group-title svg, .nav-brand-icon > *, .jump-nav a, .step.is-reading .step-number { transition: none; } }
 @media print {
   :root { --cp-bg: #ffffff; --cp-bg-elevated: #ffffff; --cp-surface: #ffffff; --cp-surface-soft: #f5f5f5; }
   .hero, body[data-run-mode="guided"] .hero { padding: 0 0 15pt; margin: 0; max-width: none; }
@@ -1053,20 +1064,31 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
   <nav class="jump-nav" id="task-menu-panel" aria-label="Guide sections">
     <div class="nav-group" data-nav-group="ready">
       <p class="nav-group-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.3"/><path d="m6.5 10 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Before you start</p>
-      <div class="nav-branches"><span class="nav-trace" aria-hidden="true"></span>
+      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><circle cx="11.5" r="2.5"/></svg>
         <a href="#step-1"><span class="nav-title">Check readiness<small data-task-state="step-1">Not started</small></span></a>
       </div>
     </div>
+    <!-- Slack and Microsoft icons: Font Awesome Free 6.7.2, Copyright 2024 Fonticons, Inc. (https://fontawesome.com), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Color groups and Microsoft pane spacing adapted for the rail. -->
     <div class="nav-group" data-nav-group="slack">
-      <p class="nav-group-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M6 3v14M13 3v14M3 7h14M3 13h14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Slack setup</p>
-      <div class="nav-branches"><span class="nav-trace" aria-hidden="true"></span>
+      <p class="nav-group-title"><svg class="nav-brand-icon" viewBox="-32 0 512 512" fill="currentColor" aria-hidden="true" focusable="false">
+        <path style="--cp-logo-fill: var(--cp-logo-slack-red)" d="M94.12 315.1c0 25.9-21.16 47.06-47.06 47.06S0 341 0 315.1c0-25.9 21.16-47.06 47.06-47.06h47.06v47.06zm23.72 0c0-25.9 21.16-47.06 47.06-47.06s47.06 21.16 47.06 47.06v117.84c0 25.9-21.16 47.06-47.06 47.06s-47.06-21.16-47.06-47.06V315.1z"/>
+        <path style="--cp-logo-fill: var(--cp-logo-slack-blue)" d="M164.9 126.12c-25.9 0-47.06-21.16-47.06-47.06S139 32 164.9 32s47.06 21.16 47.06 47.06v47.06H164.9zm0 23.72c25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06H47.06C21.16 243.96 0 222.8 0 196.9s21.16-47.06 47.06-47.06H164.9z"/>
+        <path style="--cp-logo-fill: var(--cp-logo-slack-green)" d="M353.88 196.9c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06h-47.06V196.9zm-23.72 0c0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06V79.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06V196.9z"/>
+        <path style="--cp-logo-fill: var(--cp-logo-slack-yellow)" d="M283.1 385.88c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06v-47.06h47.06zm0-23.72c-25.9 0-47.06-21.16-47.06-47.06 0-25.9 21.16-47.06 47.06-47.06h117.84c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06H283.1z"/>
+      </svg>Slack setup</p>
+      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><circle cx="11.5" r="2.5"/></svg>
         <a href="#step-2"><span class="nav-title">Enable the app<small data-task-state="step-2">Not started</small></span></a>
         <a href="#step-3"><span class="nav-title">User permissions<small data-task-state="step-3">Not started</small></span></a>
       </div>
     </div>
     <div class="nav-group" data-nav-group="microsoft">
-      <p class="nav-group-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="1.3"/></svg>Microsoft setup</p>
-      <div class="nav-branches"><span class="nav-trace" aria-hidden="true"></span>
+      <p class="nav-group-title"><svg class="nav-brand-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
+        <rect x="1" y="1" width="6" height="6" style="--cp-logo-fill: var(--cp-logo-microsoft-red)"/>
+        <rect x="9" y="1" width="6" height="6" style="--cp-logo-fill: var(--cp-logo-microsoft-green)"/>
+        <rect x="1" y="9" width="6" height="6" style="--cp-logo-fill: var(--cp-logo-microsoft-blue)"/>
+        <rect x="9" y="9" width="6" height="6" style="--cp-logo-fill: var(--cp-logo-microsoft-yellow)"/>
+      </svg>Microsoft setup</p>
+      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><circle cx="11.5" r="2.5"/></svg>
         <a href="#step-4"><span class="nav-title">Register OAuth<small data-task-state="step-4">Not started</small></span></a>
         <a href="#step-5"><span class="nav-title">Create the connector<small data-task-state="step-5">Not started</small></span></a>
         <a href="#step-6"><span class="nav-title">Connect the pilot<small data-task-state="step-6">Not started</small></span></a>
@@ -1074,7 +1096,7 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
     </div>
     <div class="nav-group" data-nav-group="reference">
       <p class="nav-group-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m3 7 7-4 7 4-7 4-7-4Zm0 4 7 4 7-4M3 15l7 4 7-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Verify &amp; extend</p>
-      <div class="nav-branches"><span class="nav-trace" aria-hidden="true"></span>
+      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><circle cx="11.5" r="2.5"/></svg>
         <a href="#step-7"><span class="nav-title">Prove retrieval<small data-task-state="step-7">Not started</small></span></a>
         <a href="#step-8"><span class="nav-title">Troubleshoot</span></a>
         <a href="#capabilities"><span class="nav-title">Tools &amp; scopes</span></a>
@@ -1279,7 +1301,7 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
 <footer>This static page does not send entered setup values to a server. Explicit device saves stay in your browser; downloaded copies can contain internal tenant names and non-secret IDs. Do not enter credentials. GitHub serves this site and handles hosting request data under its <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">privacy statement</a>. There are no added analytics, external scripts, live API calls, or remote assets. Opening a portal or documentation link leaves this guide. Review saved copies before sharing.</footer>
 </main>
 </div>
-<p class="community-disclaimer community-disclaimer-bottom">Unofficial community resource. Not affiliated with Microsoft. &middot; <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors" target="_blank" rel="noopener noreferrer">Microsoft Learn</a> &middot; <span class="last-updated">Last updated: <time datetime="2026-11-25">11.25.26</time></span></p>
+<p class="community-disclaimer community-disclaimer-bottom">Unofficial community resource. Not affiliated with Microsoft. &middot; <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors" target="_blank" rel="noopener noreferrer">Microsoft Learn</a> &middot; <span class="last-updated">Last updated: <time datetime="2026-11-26">11.26.26</time></span></p>
 <div id="status" role="status" aria-live="polite"></div>
 <dialog id="copy-dialog" aria-labelledby="copy-title"><h2 id="copy-title">Copy manually</h2><p>Clipboard access is unavailable in this browser context. Select the text below and press Ctrl+C (or Command+C).</p><textarea id="copy-buffer" readonly aria-label="Text to copy"></textarea><button id="close-copy" type="button">Close</button></dialog>
 <noscript><div class="notice danger">JavaScript is disabled. Read the static steps, but personalization, copy buttons, progress, and downloads require JavaScript. Open the downloaded file in Edge or Chrome with JavaScript enabled.</div></noscript>
@@ -2036,10 +2058,12 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
     root.querySelector('#guide-tools').open = false;
     for (const detail of root.querySelectorAll('.task-detail')) detail.open = false;
     root.querySelector('.toc').classList.remove('is-page-flow');
+    root.querySelector('.toc').style.removeProperty('--nav-rail-inset');
     root.querySelector('#profile-fields').replaceChildren();
     root.querySelector('#task-fields').replaceChildren();
     for (const group of root.querySelectorAll('.nav-group')) group.removeAttribute('data-active');
-    for (const trace of root.querySelectorAll('.nav-trace')) trace.removeAttribute('style');
+    for (const path of root.querySelectorAll('.nav-trace path')) path.removeAttribute('d');
+    for (const dot of root.querySelectorAll('.nav-trace circle')) dot.removeAttribute('cy');
     for (const section of root.querySelectorAll('.is-reading')) section.classList.remove('is-reading');
     for (const image of root.querySelectorAll('.reference-screenshot')) image.remove();
     for (const id of ['oauth-table','connector-table']) root.querySelector('#' + id + ' tbody').replaceChildren();
@@ -2154,11 +2178,44 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
   catch (error) { notify('Embedded profile could not be loaded: ' + error.message + ' Start with the visible blank template.'); }
   initial.workflow.mode = 'reference';
   applyState(initial);
+  const railMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const railDraws = new Map();
+  railMotion.addEventListener('change', () => {
+    if (railMotion.matches) for (const draw of railDraws.values()) for (const animation of draw.animations) animation.cancel();
+  });
+  function drawRailTrace(trace, link) {
+    const previous = railDraws.get(trace);
+    if (!link || !link.offsetHeight) {
+      if (previous) for (const animation of previous.animations) animation.cancel();
+      railDraws.delete(trace);
+      return;
+    }
+    const y = link.offsetTop + link.offsetHeight / 2 + .5;
+    if (previous?.link === link && previous.y === y) return;
+    const [path, dot] = trace.children;
+    const radius = 5.5;
+    path.setAttribute('d', `M .5 0 V ${y - radius} A ${radius} ${radius} 0 0 0 6 ${y} H 11.5`);
+    dot.setAttribute('cy', y);
+    if (previous?.link === link) { previous.y = y; return; }
+    if (previous) for (const animation of previous.animations) animation.cancel();
+    const animations = [];
+    if (!railMotion.matches && typeof path.animate === 'function') {
+      const duration = Math.max(270, Math.min(540, Math.round(160 + path.getTotalLength() * 3.6)));
+      animations.push(path.animate([{strokeDashoffset:1},{strokeDashoffset:0}], {duration,easing:'ease-in-out'}));
+      animations.push(dot.animate([{opacity:0,transform:'scale(0)'},{opacity:1,transform:'scale(1)'}], {delay:duration,duration:150,fill:'backwards',easing:'ease-out'}));
+    }
+    railDraws.set(trace, {link,y,animations});
+  }
   function updateReadingNavigation() {
     if (printTheme !== undefined) return;
     const toc = document.querySelector('.toc');
-    const navTop = parseFloat(getComputedStyle(toc).top) || 112;
-    toc.classList.toggle('is-page-flow', innerWidth > 1000 && toc.scrollHeight > innerHeight - navTop - 24);
+    const topbarHeight = document.querySelector('.topbar').offsetHeight;
+    const minRailInset = Math.max(7 * parseFloat(getComputedStyle(document.documentElement).fontSize), topbarHeight + 16);
+    const railHeight = toc.offsetHeight;
+    const fitsDesktop = innerWidth > 1000 && railHeight <= innerHeight - minRailInset - 24;
+    toc.classList.toggle('is-page-flow', innerWidth > 1000 && !fitsDesktop);
+    const railInset = fitsDesktop ? `${Math.max(minRailInset, Math.round((innerHeight + topbarHeight - railHeight) / 2))}px` : '';
+    if (toc.style.getPropertyValue('--nav-rail-inset') !== railInset) toc.style.setProperty('--nav-rail-inset',railInset);
     const chapters = Array.from(document.querySelectorAll('#task-document > section.step'));
     const links = Array.from(document.querySelectorAll('.jump-nav a'));
     let current = state.workflow.current;
@@ -2176,7 +2233,7 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
     for (const group of document.querySelectorAll('.nav-group')) {
       const link = group.querySelector('a[aria-current="location"]');
       group.dataset.active = String(Boolean(link));
-      if (link) group.querySelector('.nav-trace').style.setProperty('--nav-trace-height', (link.offsetTop + link.offsetHeight / 2) + 'px');
+      drawRailTrace(group.querySelector('.nav-trace'), link);
     }
   }
   function scheduleReadingNavigation() {
