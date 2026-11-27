@@ -630,16 +630,9 @@ body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
   --cp-link: #006db0;
   --cp-highlight: #f1dbe4;
   --cp-error-soft: #f9ecee;
-  --cp-cover-ink: var(--cp-text);
-  --cp-cover-muted: var(--cp-text-muted);
-  --cp-cover-paper: var(--cp-bg);
-  --cp-cover-sage: var(--cp-surface-soft);
-  --cp-guided-bg: var(--cp-accent);
-  --cp-guided-hover: var(--cp-accent-hover);
-  --cp-guided-fg: var(--cp-accent-fg);
-  --cp-nav-ready: #7d5063;
-  --cp-nav-slack: #8251d0;
-  --cp-nav-microsoft: #2174cf;
+  --cp-phase-slack: #7b49c7;
+  --cp-phase-microsoft: #1e65b6;
+  --cp-phase-verify: #985509;
   --cp-logo-slack-red: #e01e5a;
   --cp-logo-slack-blue: #36c5f0;
   --cp-logo-slack-green: #2eb67d;
@@ -648,7 +641,13 @@ body[data-run-mode="reference"] .task-actions { margin: 1.25rem 0 1.5rem; }
   --cp-logo-microsoft-green: #7fba00;
   --cp-logo-microsoft-blue: #00a4ef;
   --cp-logo-microsoft-yellow: #ffb900;
-  --cp-nav-reference: #cf7900;
+  --cp-cover-ink: var(--cp-text);
+  --cp-cover-muted: var(--cp-text-muted);
+  --cp-cover-paper: var(--cp-bg);
+  --cp-cover-sage: var(--cp-surface-soft);
+  --cp-guided-bg: var(--cp-accent);
+  --cp-guided-hover: var(--cp-accent-hover);
+  --cp-guided-fg: var(--cp-accent-fg);
   --cp-heading-font: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
   --cp-shadow: 0 8px 24px rgba(0, 0, 0, .08);
 }
@@ -674,10 +673,9 @@ html[data-theme="dark"] {
   --cp-link: #9ac9f1;
   --cp-highlight: #59414a;
   --cp-error-soft: #49343b;
-  --cp-nav-ready: #c6a9b5;
-  --cp-nav-slack: #b99aee;
-  --cp-nav-microsoft: #80b9f4;
-  --cp-nav-reference: #f4b760;
+  --cp-phase-slack: #b99aee;
+  --cp-phase-microsoft: #80b9f4;
+  --cp-phase-verify: #f4b760;
   --cp-cover-ink: var(--cp-text);
   --cp-cover-muted: var(--cp-text-muted);
   --cp-cover-paper: var(--cp-bg);
@@ -705,7 +703,6 @@ button.primary { font-weight: 600; }
 .hero::before, .connection-map::before, .connection-map::after { display: none; animation: none; }
 .cover-copy { max-width: 720px; }
 .cover-copy h1 { font-size: clamp(2.5rem, 3.5vw, 3.35rem); font-weight: 500; line-height: 1.1; letter-spacing: -.035em; max-width: none; margin-bottom: 1rem; }
-.cover-copy h1 em { font-family: "Segoe Serif Display", Georgia, "Times New Roman", serif; font-style: italic; }
 .cover-copy .lede { max-width: 58ch; font-size: 1.0625rem; line-height: 1.55; margin-bottom: 1.5rem; }
 .cover-actions { gap: 1.25rem; }
 .cover-actions a { color: var(--cp-text-muted); font-size: .8rem; font-weight: 400; }
@@ -724,29 +721,32 @@ body[data-run-mode="reference"] #personalize-button { min-height: 42px; font-siz
 @media (max-height: 620px) and (min-width: 1001px) { .toc { position: static; } }
 .toc-heading { display: none; }
 .jump-nav { display: block; margin: 0; }
-.nav-group { --cp-branch: var(--cp-nav-ready); margin: 0 0 1.5rem; }
+.nav-group, .step { --cp-phase-accent: var(--cp-accent); }
+.nav-group[data-nav-group="slack"], :is(#step-2,#step-3) { --cp-phase-accent: var(--cp-phase-slack); }
+.nav-group[data-nav-group="microsoft"], :is(#step-4,#step-5,#step-6) { --cp-phase-accent: var(--cp-phase-microsoft); }
+.nav-group[data-nav-group="reference"], :is(#step-7,#step-8,#capabilities,#references) { --cp-phase-accent: var(--cp-phase-verify); }
+.nav-group { margin: 0 0 1.25rem; }
 .nav-group:last-child { margin-bottom: 0; }
-.nav-group[data-nav-group="slack"] { --cp-branch: var(--cp-nav-slack); }
-.nav-group[data-nav-group="microsoft"] { --cp-branch: var(--cp-nav-microsoft); }
-.nav-group[data-nav-group="reference"] { --cp-branch: var(--cp-nav-reference); }
-.nav-group-title { display: flex; align-items: center; gap: .45rem; margin: 0 0 .35rem; font-size: .8rem; font-weight: 500; color: var(--cp-text-muted); transition: color 300ms ease; }
-.nav-group-title svg { width: 16px; height: 16px; flex: 0 0 16px; color: var(--cp-border-strong); transition: color 300ms ease; }
-.nav-group[data-active="true"] .nav-group-title { color: var(--cp-text); }
-.nav-group[data-active="true"] .nav-group-title svg:not(.nav-brand-icon) { color: var(--cp-branch); }
-.nav-brand-icon > * { transition: fill 300ms ease; }
-.nav-group[data-active="true"] .nav-brand-icon > * { fill: var(--cp-logo-fill, currentColor); }
-.nav-branches { --nav-bend: 7px; position: relative; margin-inline-start: 7px; }
-.nav-trace { position: absolute; z-index: 1; left: 0; top: 0; width: 14px; height: 100%; overflow: visible; pointer-events: none; visibility: hidden; color: var(--cp-branch); }
+.nav-group-title { display: flex; align-items: center; gap: .5rem; margin: 0 0 .25rem; font-size: .875rem; font-weight: 600; line-height: 1.4; color: var(--cp-text-muted); }
+.nav-section-icon { width: 16px; height: 16px; flex: 0 0 16px; color: var(--cp-text-soft); }
+.nav-group[data-active="true"] :is(.nav-group-title,.nav-section-icon:not(.nav-brand-icon)) { color: var(--cp-phase-accent); }
+.nav-group[data-active="true"] .nav-brand-icon > * { fill: var(--cp-logo-fill); }
+.nav-branches { --nav-bend: 10px; position: relative; margin-inline-start: 7px; }
+.nav-group[data-active="true"] .nav-branches::before { content: ""; position: absolute; inset: 0 auto 0 -6px; width: 13px; border-radius: 6.5px; background: var(--cp-surface-soft); background: color-mix(in srgb, var(--cp-phase-accent) 14%, var(--cp-bg)); pointer-events: none; }
+.nav-trace { position: absolute; z-index: 1; left: 0; top: 0; width: 18px; height: 100%; overflow: visible; pointer-events: none; visibility: hidden; color: var(--cp-phase-accent); }
 .nav-group[data-active="true"] .nav-trace { visibility: visible; }
-.nav-trace path { fill: none; stroke: currentColor; stroke-width: 1px; stroke-dasharray: 1; }
-.nav-trace circle { fill: currentColor; transform-box: fill-box; transform-origin: center; }
-.jump-nav .nav-branches a { position: relative; display: block; min-height: 28px; padding: .25rem 0 .25rem 17px; border: 0; border-radius: 0; background: none; font-size: .8rem; color: var(--cp-text-muted); line-height: 1.5; transition: color 180ms ease; }
-.nav-branches a::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--cp-border); }
+.nav-trace path { fill: none; stroke: currentColor; stroke-width: 1px; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.nav-dot { fill: currentColor; transform-box: fill-box; transform-origin: center; }
+.nav-folio rect { fill: var(--cp-bg); }
+.nav-number { fill: currentColor; font-size: 10.5px; font-weight: 650; font-variant-numeric: tabular-nums; text-anchor: middle; }
+.jump-nav .nav-branches a { position: relative; display: flex; align-items: center; min-height: 30px; padding: .25rem 0 .25rem 22px; border: 0; border-radius: 0; background: none; font-size: .875rem; color: var(--cp-text-muted); line-height: 1.4; }
+.nav-branches a::before, .nav-branches a::after { content: ""; position: absolute; left: 0; pointer-events: none; }
+.nav-branches a::before { top: 0; bottom: 0; border-left: 1px solid var(--cp-border); }
 .nav-branches a:last-child::before { bottom: calc(50% + var(--nav-bend)); }
-.nav-branches a::after { content: ""; position: absolute; box-sizing: border-box; left: 0; top: calc(50% - var(--nav-bend)); width: 11px; height: calc(var(--nav-bend) + 1px); border: solid var(--cp-border); border-width: 0 0 1px 1px; border-bottom-left-radius: 6px; pointer-events: none; }
-.jump-nav .nav-branches a:hover { color: var(--cp-text); }
-.jump-nav .nav-branches a[aria-current="location"] { color: var(--cp-text); font-weight: 500; }
-.nav-title { font-size: .8rem !important; color: inherit !important; }
+.nav-branches a::after { box-sizing: border-box; top: calc(50% - var(--nav-bend)); width: 14px; height: calc(var(--nav-bend) + 1px); border: solid var(--cp-border); border-width: 0 0 1px 1px; border-bottom-left-radius: 9px; }
+.jump-nav .nav-branches a:hover { color: var(--cp-text); text-decoration: underline; text-underline-offset: .18em; }
+.jump-nav .nav-branches a[aria-current="location"] { color: var(--cp-text); font-weight: 600; }
+.nav-title { font-size: inherit !important; color: inherit !important; }
 .nav-title small, .jump-nav a[data-state="complete"] .nav-title small, .jump-nav a[data-state="blocked"] .nav-title small { display: block; position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .journey-status { padding: .8rem 0; font-size: .72rem; }
 .journey-status strong { font-size: .75rem; font-weight: 500; }
@@ -830,7 +830,7 @@ body[data-run-mode="guided"] .step-head h2 { font-size: 1.875rem; }
 body[data-run-mode="guided"] .step-number { font-size: 1.5rem; flex-basis: 2.25rem; }
 body[data-run-mode="guided"] .task-actions .click-path-steps > li { padding-block: 0; }
 body[data-run-mode="guided"] .task-document > .task-exit { margin-top: .75rem; padding-top: .9rem; }
-.step.is-reading .step-number { color: var(--cp-accent); transition: color 300ms ease; }
+.step.is-reading .step-number { color: var(--cp-phase-accent); transition: color 300ms ease; }
 @media (max-width: 1200px) { body[data-run-mode="guided"] .layout { gap: 32px; } }
 @media (min-width: 701px) and (max-width: 1200px) {
   body[data-run-mode="guided"] .run-workarea { grid-template-columns: minmax(0, 1fr); }
@@ -844,6 +844,7 @@ body[data-run-mode="guided"] .task-document > .task-exit { margin-top: .75rem; p
   .toc, body[data-run-mode="guided"] .toc { position: static; max-height: none; overflow: visible; }
   body[data-run-mode] .jump-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; padding: 1rem .5rem 0; }
   .nav-group { margin-bottom: .5rem; }
+  .jump-nav .nav-branches a { min-height: 44px; }
   body[data-run-mode="guided"] .hero .cover-meta { display: block; margin: 1rem 0 0; }
 }
 @media (max-width: 700px) {
@@ -873,7 +874,7 @@ body[data-run-mode="guided"] .task-document > .task-exit { margin-top: .75rem; p
   .mode-switch { gap: .35rem; }
 }
 @media (max-width: 420px) { body[data-run-mode] .jump-nav { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce) { .nav-group-title, .nav-group-title svg, .nav-brand-icon > *, .jump-nav a, .step.is-reading .step-number { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .step.is-reading .step-number { transition: none; } }
 @media print {
   :root { --cp-bg: #ffffff; --cp-bg-elevated: #ffffff; --cp-surface: #ffffff; --cp-surface-soft: #f5f5f5; }
   .hero, body[data-run-mode="guided"] .hero { padding: 0 0 15pt; margin: 0; max-width: none; }
@@ -894,32 +895,23 @@ body[data-run-mode="guided"] .task-document > .task-exit { margin-top: .75rem; p
 :root {
   --cp-flow-sky: #e7f3fa;
   --cp-flow-leaf: #e8f2e5;
-  --cp-pane-sky: #d8edf9;
-  --cp-pane-sky-edge: #c3e2f3;
-  --cp-pane-leaf: #dcebd8;
 }
 html[data-theme="dark"] {
   --cp-flow-sky: #344951;
   --cp-flow-leaf: #3a4d3c;
-  --cp-pane-sky: #3b535d;
-  --cp-pane-sky-edge: #44616b;
-  --cp-pane-leaf: #435745;
 }
 .setup-flow { max-inline-size: 56rem; margin: 1.75rem 0 0; }
 .setup-flow figcaption { margin: .625rem 0 0; max-inline-size: 72ch; color: var(--cp-text-muted); font-size: .875rem; line-height: 1.5; }
-.connection-art { position: relative; isolation: isolate; overflow: clip; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1.1fr); align-items: center; gap: clamp(.75rem,2vw,1.75rem); padding: clamp(1rem,3vw,2.25rem); border-radius: 1rem; background: var(--cp-flow-sky); }
-.connection-art::before { content: ""; position: absolute; z-index: -1; inset: 25% -12% -45% 48%; transform: rotate(-12deg); border-radius: 2rem; background: var(--cp-pane-leaf); }
-.connection-art::after { content: ""; position: absolute; z-index: -1; inset: -32% 32% 32% -10%; transform: rotate(-12deg); border-radius: 2rem; border: 1px solid var(--cp-pane-sky-edge); background: var(--cp-pane-sky); }
-.art-pane { min-inline-size: 0; padding: .75rem 1rem; border: 1px solid var(--cp-reading-line); border-radius: .625rem; background: var(--cp-surface); }
+.connection-art { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1.1fr); align-items: center; gap: clamp(.75rem,2vw,1.5rem); padding: clamp(1rem,3vw,2rem); border: 1px solid var(--cp-reading-line); border-radius: 1rem; background: linear-gradient(120deg, var(--cp-flow-sky), var(--cp-flow-leaf)); }
+.art-pane { align-self: stretch; min-inline-size: 0; padding: .875rem 1rem; border: 1px solid var(--cp-border); border-radius: .625rem; background: var(--cp-surface); }
 .art-pane p { margin: .375rem 0 0; line-height: 1.5; }
-.art-message { transform: translateY(-.4375rem); }
-.art-answer { transform: translateY(.4375rem); }
 .art-label, .art-connector small { display: block; color: var(--cp-text-muted); font-size: .8125rem; line-height: 1.45; }
+.art-message .art-label { color: var(--cp-phase-slack); }
+.art-answer .art-label { color: var(--cp-phase-microsoft); }
 .art-connector { margin: 0; text-align: center; font-size: .875rem; font-weight: 600; }
-.art-connector svg { display: block; margin: 0 auto .25rem; color: var(--cp-text-muted); }
-.art-citation { display: inline-block; margin-top: .5rem; padding: .125rem .5rem; border-radius: .375rem; background: var(--cp-reading-note); font-size: .8125rem; }
+.art-connector svg { display: block; margin: 0 auto .25rem; color: var(--cp-accent); }
+.art-citation { display: inline-block; margin-top: .5rem; padding: .125rem .5rem; border-radius: .375rem; background: var(--cp-flow-leaf); font-size: .8125rem; }
 body[data-run-mode="guided"] .setup-flow { display: none; }
-.hero h1 em { font-style: normal; }
 .task-goal { max-inline-size: 72ch; color: var(--cp-text-muted); }
 .task-goal strong { margin-inline-end: .5em; color: var(--cp-text); font-weight: 600; }
 .click-path-steps .click-title { margin: 0 0 .25rem; font-size: 1.0625rem; line-height: 1.4; font-weight: 650; color: var(--cp-text); break-after: avoid; }
@@ -951,7 +943,7 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
   #guide .click-path-steps > li:not(:last-child) { margin-bottom: 1.5rem; }
   #guide .task-document .check { padding-block: .125rem; }
   #guide .step-material { border: 1px solid var(--cp-reading-line); border-radius: .625rem; background: var(--cp-surface); }
-  #guide .step-material .material-header { border-radius: .625rem .625rem 0 0; background: var(--cp-flow-sky); }
+  #guide .step-material .material-header { border-radius: .625rem .625rem 0 0; background: var(--cp-surface-soft); background: color-mix(in srgb, var(--cp-phase-accent) 8%, var(--cp-surface)); }
   #guide .step-material :is(.value-box,.table-wrap) { margin: 0; border: 0; border-radius: 0 0 .625rem .625rem; }
   #guide .step-material .value-box { background: none; padding: .625rem .875rem; }
   #guide .step-material .copy { font-weight: 600; min-inline-size: 4.75rem; }
@@ -960,8 +952,6 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
 }
 @media screen and (max-width: 620px) {
   .connection-art { grid-template-columns: minmax(0, 1fr); gap: .625rem; }
-  .art-message { transform: none; margin-inline-end: 1.5rem; }
-  .art-answer { transform: none; margin-inline-start: 1.5rem; }
   .art-connector { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .375rem; }
   .art-connector svg { width: 1.375rem; height: 1.375rem; margin: 0; transform: rotate(90deg); }
   .click-path-steps .click-title { font-size: 1rem; }
@@ -991,8 +981,7 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
     body[data-run-mode] .mode-switch button:not([aria-pressed="true"]) { background: none; border-color: var(--cp-clear); }
     body[data-run-mode="guided"] #task-location { display: none; }
     body[data-run-mode="guided"] .step[data-guided-task] { padding: 0; }
-    body[data-run-mode="guided"] .step[data-guided-task] > .step-head { align-items: baseline; margin: 1rem 0 0; padding: .75rem 1.125rem; border: 1px solid var(--cp-reading-line); border-radius: .625rem .625rem 0 0; background: var(--cp-flow-sky); }
-    body[data-run-mode="guided"] :is(#step-3,#step-7) > .step-head { background: var(--cp-flow-leaf); }
+    body[data-run-mode="guided"] .step[data-guided-task] > .step-head { align-items: baseline; margin: 1rem 0 0; padding: .75rem 1.125rem; border: 1px solid var(--cp-reading-line); border-radius: .625rem .625rem 0 0; background: var(--cp-flow-sky); background: color-mix(in srgb, var(--cp-phase-accent) 14%, var(--cp-surface)); }
     body[data-run-mode="guided"] .step[data-guided-task] > .step-head h2 { font-size: clamp(1.375rem, 2vw, 1.75rem); }
     body[data-run-mode="guided"] .guided-section-body { padding: 1rem clamp(.75rem, 2vw, 1.5rem); border: 1px solid var(--cp-reading-line); border-block-start: 0; border-radius: 0 0 .625rem .625rem; background: var(--cp-surface); }
     body[data-run-mode="guided"] #guide .guided-section-body .task-actions { margin: 0 0 1rem; }
@@ -1037,14 +1026,14 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
 <a class="skip-link" href="#guide">Skip to the guide</a>
 <p class="community-disclaimer community-disclaimer-top">Unofficial community resource. Not affiliated with Microsoft. &middot; <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors" target="_blank" rel="noopener noreferrer">Microsoft Learn</a></p>
 <header class="topbar">
-  <div class="brand"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3" y="4" width="17" height="22" rx="5" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="8" width="17" height="22" rx="5" stroke="currentColor" stroke-width="1.5"/></svg><div>Microsoft Copilot<span>Slack MCP Connector to Copilot / Implementation Guide</span></div></div>
+  <div class="brand"><div>Slack to Copilot<span>Community implementation guide</span></div></div>
   <div class="actions">
     <button id="theme-button" type="button" aria-label="Switch light or dark theme" title="Switch light or dark theme"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M12 4a8 8 0 0 0 0 16V4Z" fill="currentColor"/></svg></button>
   </div>
 </header>
 <section class="hero" aria-labelledby="page-title">
   <div class="cover-copy">
-    <h1 id="page-title">Bring Slack into <em>Microsoft Copilot.</em></h1>
+    <h1 id="page-title">Bring Slack into Microsoft Copilot</h1>
     <p class="lede">Set up a read-only Slack connection in the Microsoft 365 admin center. Then test it with a public-channel message.</p>
     <div class="cover-actions"><button id="personalize-button" class="primary" type="button">Start guided setup</button><a href="#capabilities">Additional MCP tools &amp; scopes</a></div>
   </div>
@@ -1062,41 +1051,41 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
   <div class="toc-heading">Implementation tasks</div>
   <button id="task-menu-toggle" type="button" aria-expanded="false" aria-controls="task-menu-panel">Tasks and progress</button>
   <nav class="jump-nav" id="task-menu-panel" aria-label="Guide sections">
-    <div class="nav-group" data-nav-group="ready">
-      <p class="nav-group-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.3"/><path d="m6.5 10 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Before you start</p>
-      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><circle cx="11.5" r="2.5"/></svg>
+    <div class="nav-group" data-nav-group="ready" role="group" aria-labelledby="nav-ready">
+      <p class="nav-group-title" id="nav-ready"><svg class="nav-section-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 4.5h10v11H5zM7.5 8h5m-5 3h3"/></svg>Before you start</p>
+      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><g class="nav-folio"><rect x="-6" width="13" height="13" rx="1"/><text class="nav-number" x=".5" textLength="11" lengthAdjust="spacingAndGlyphs"></text></g><circle class="nav-dot" cx="14.5" r="2.5"/></svg>
         <a href="#step-1"><span class="nav-title">Check readiness<small data-task-state="step-1">Not started</small></span></a>
       </div>
     </div>
     <!-- Slack and Microsoft icons: Font Awesome Free 6.7.2, Copyright 2024 Fonticons, Inc. (https://fontawesome.com), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Color groups and Microsoft pane spacing adapted for the rail. -->
-    <div class="nav-group" data-nav-group="slack">
-      <p class="nav-group-title"><svg class="nav-brand-icon" viewBox="-32 0 512 512" fill="currentColor" aria-hidden="true" focusable="false">
+    <div class="nav-group" data-nav-group="slack" role="group" aria-labelledby="nav-slack">
+      <p class="nav-group-title" id="nav-slack"><svg class="nav-section-icon nav-brand-icon" viewBox="-32 0 512 512" fill="currentColor" aria-hidden="true" focusable="false">
         <path style="--cp-logo-fill: var(--cp-logo-slack-red)" d="M94.12 315.1c0 25.9-21.16 47.06-47.06 47.06S0 341 0 315.1c0-25.9 21.16-47.06 47.06-47.06h47.06v47.06zm23.72 0c0-25.9 21.16-47.06 47.06-47.06s47.06 21.16 47.06 47.06v117.84c0 25.9-21.16 47.06-47.06 47.06s-47.06-21.16-47.06-47.06V315.1z"/>
         <path style="--cp-logo-fill: var(--cp-logo-slack-blue)" d="M164.9 126.12c-25.9 0-47.06-21.16-47.06-47.06S139 32 164.9 32s47.06 21.16 47.06 47.06v47.06H164.9zm0 23.72c25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06H47.06C21.16 243.96 0 222.8 0 196.9s21.16-47.06 47.06-47.06H164.9z"/>
         <path style="--cp-logo-fill: var(--cp-logo-slack-green)" d="M353.88 196.9c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06h-47.06V196.9zm-23.72 0c0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06V79.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06V196.9z"/>
         <path style="--cp-logo-fill: var(--cp-logo-slack-yellow)" d="M283.1 385.88c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06v-47.06h47.06zm0-23.72c-25.9 0-47.06-21.16-47.06-47.06 0-25.9 21.16-47.06 47.06-47.06h117.84c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06H283.1z"/>
       </svg>Slack setup</p>
-      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><circle cx="11.5" r="2.5"/></svg>
+      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><g class="nav-folio"><rect x="-6" width="13" height="13" rx="1"/><text class="nav-number" x=".5" textLength="11" lengthAdjust="spacingAndGlyphs"></text></g><circle class="nav-dot" cx="14.5" r="2.5"/></svg>
         <a href="#step-2"><span class="nav-title">Enable the app<small data-task-state="step-2">Not started</small></span></a>
         <a href="#step-3"><span class="nav-title">User permissions<small data-task-state="step-3">Not started</small></span></a>
       </div>
     </div>
-    <div class="nav-group" data-nav-group="microsoft">
-      <p class="nav-group-title"><svg class="nav-brand-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
+    <div class="nav-group" data-nav-group="microsoft" role="group" aria-labelledby="nav-microsoft">
+      <p class="nav-group-title" id="nav-microsoft"><svg class="nav-section-icon nav-brand-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
         <rect x="1" y="1" width="6" height="6" style="--cp-logo-fill: var(--cp-logo-microsoft-red)"/>
         <rect x="9" y="1" width="6" height="6" style="--cp-logo-fill: var(--cp-logo-microsoft-green)"/>
         <rect x="1" y="9" width="6" height="6" style="--cp-logo-fill: var(--cp-logo-microsoft-blue)"/>
         <rect x="9" y="9" width="6" height="6" style="--cp-logo-fill: var(--cp-logo-microsoft-yellow)"/>
       </svg>Microsoft setup</p>
-      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><circle cx="11.5" r="2.5"/></svg>
+      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><g class="nav-folio"><rect x="-6" width="13" height="13" rx="1"/><text class="nav-number" x=".5" textLength="11" lengthAdjust="spacingAndGlyphs"></text></g><circle class="nav-dot" cx="14.5" r="2.5"/></svg>
         <a href="#step-4"><span class="nav-title">Register OAuth<small data-task-state="step-4">Not started</small></span></a>
         <a href="#step-5"><span class="nav-title">Create the connector<small data-task-state="step-5">Not started</small></span></a>
         <a href="#step-6"><span class="nav-title">Connect the pilot<small data-task-state="step-6">Not started</small></span></a>
       </div>
     </div>
-    <div class="nav-group" data-nav-group="reference">
-      <p class="nav-group-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m3 7 7-4 7 4-7 4-7-4Zm0 4 7 4 7-4M3 15l7 4 7-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Verify &amp; extend</p>
-      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><circle cx="11.5" r="2.5"/></svg>
+    <div class="nav-group" data-nav-group="reference" role="group" aria-labelledby="nav-reference">
+      <p class="nav-group-title" id="nav-reference"><svg class="nav-section-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15.5 10.5v5h-11v-11H12M8 9.5l2.5 2.5 5.5-6"/></svg>Verify &amp; extend</p>
+      <div class="nav-branches"><svg class="nav-trace" aria-hidden="true" focusable="false"><path pathLength="1"/><g class="nav-folio"><rect x="-6" width="13" height="13" rx="1"/><text class="nav-number" x=".5" textLength="11" lengthAdjust="spacingAndGlyphs"></text></g><circle class="nav-dot" cx="14.5" r="2.5"/></svg>
         <a href="#step-7"><span class="nav-title">Prove retrieval<small data-task-state="step-7">Not started</small></span></a>
         <a href="#step-8"><span class="nav-title">Troubleshoot</span></a>
         <a href="#capabilities"><span class="nav-title">Tools &amp; scopes</span></a>
@@ -1301,7 +1290,7 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
 <footer>This static page does not send entered setup values to a server. Explicit device saves stay in your browser; downloaded copies can contain internal tenant names and non-secret IDs. Do not enter credentials. GitHub serves this site and handles hosting request data under its <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">privacy statement</a>. There are no added analytics, external scripts, live API calls, or remote assets. Opening a portal or documentation link leaves this guide. Review saved copies before sharing.</footer>
 </main>
 </div>
-<p class="community-disclaimer community-disclaimer-bottom">Unofficial community resource. Not affiliated with Microsoft. &middot; <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors" target="_blank" rel="noopener noreferrer">Microsoft Learn</a> &middot; <span class="last-updated">Last updated: <time datetime="2026-11-26">11.26.26</time></span></p>
+<p class="community-disclaimer community-disclaimer-bottom">Unofficial community resource. Not affiliated with Microsoft. &middot; <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/set-up-custom-federated-connectors" target="_blank" rel="noopener noreferrer">Microsoft Learn</a> &middot; <span class="last-updated">Last updated: <time datetime="2026-11-27">11.27.26</time></span></p>
 <div id="status" role="status" aria-live="polite"></div>
 <dialog id="copy-dialog" aria-labelledby="copy-title"><h2 id="copy-title">Copy manually</h2><p>Clipboard access is unavailable in this browser context. Select the text below and press Ctrl+C (or Command+C).</p><textarea id="copy-buffer" readonly aria-label="Text to copy"></textarea><button id="close-copy" type="button">Close</button></dialog>
 <noscript><div class="notice danger">JavaScript is disabled. Read the static steps, but personalization, copy buttons, progress, and downloads require JavaScript. Open the downloaded file in Edge or Chrome with JavaScript enabled.</div></noscript>
@@ -2062,8 +2051,7 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
     root.querySelector('#profile-fields').replaceChildren();
     root.querySelector('#task-fields').replaceChildren();
     for (const group of root.querySelectorAll('.nav-group')) group.removeAttribute('data-active');
-    for (const path of root.querySelectorAll('.nav-trace path')) path.removeAttribute('d');
-    for (const dot of root.querySelectorAll('.nav-trace circle')) dot.removeAttribute('cy');
+    for (const trace of root.querySelectorAll('.nav-trace')) clearRailTrace(trace);
     for (const section of root.querySelectorAll('.is-reading')) section.classList.remove('is-reading');
     for (const image of root.querySelectorAll('.reference-screenshot')) image.remove();
     for (const id of ['oauth-table','connector-table']) root.querySelector('#' + id + ' tbody').replaceChildren();
@@ -2133,7 +2121,7 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
     byId('guide-tools').querySelector('summary').focus({preventScroll:true});
   });
   byId('guided-mode').addEventListener('click', () => { state.workflow.mode = 'guided'; navigateRunbook(state.workflow.current); });
-  byId('task-menu-toggle').addEventListener('click', () => { const button = byId('task-menu-toggle'); button.setAttribute('aria-expanded', String(button.getAttribute('aria-expanded') !== 'true')); });
+  byId('task-menu-toggle').addEventListener('click', () => { const button = byId('task-menu-toggle'); button.setAttribute('aria-expanded', String(button.getAttribute('aria-expanded') !== 'true')); scheduleReadingNavigation(); });
   byId('reference-mode').addEventListener('click', () => { state.workflow.mode = 'reference'; renderRunbook(); });
   document.querySelector('.jump-nav').addEventListener('click',event => { const link = event.target.closest('a[href^="#"]'); if (!link) return; event.preventDefault(); navigateRunbook(link.getAttribute('href').slice(1)); });
   document.querySelector('.cover-actions a').addEventListener('click',event => { event.preventDefault(); navigateRunbook('capabilities'); });
@@ -2179,30 +2167,53 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
   initial.workflow.mode = 'reference';
   applyState(initial);
   const railMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const railChapters = [...document.querySelectorAll('#task-document > section.step')];
+  const railNumbers = new Map(railChapters.map((chapter, index) => [
+    '#' + chapter.id, chapter.querySelector('.step-number')?.textContent.trim() || String(index + 1).padStart(2, '0')
+  ]));
   const railDraws = new Map();
   railMotion.addEventListener('change', () => {
     if (railMotion.matches) for (const draw of railDraws.values()) for (const animation of draw.animations) animation.cancel();
   });
+  function clearRailTrace(trace) {
+    const [path, folio, dot] = trace.children;
+    const [cutout, number] = folio.children;
+    path.removeAttribute('d');
+    cutout.removeAttribute('y');
+    number.removeAttribute('y');
+    dot.removeAttribute('cy');
+    number.textContent = '';
+  }
   function drawRailTrace(trace, link) {
     const previous = railDraws.get(trace);
     if (!link || !link.offsetHeight) {
-      if (previous) for (const animation of previous.animations) animation.cancel();
-      railDraws.delete(trace);
+      if (previous) {
+        for (const animation of previous.animations) animation.cancel();
+        clearRailTrace(trace);
+        railDraws.delete(trace);
+      }
       return;
     }
-    const y = link.offsetTop + link.offsetHeight / 2 + .5;
+    const row = link.getBoundingClientRect();
+    const y = row.top - trace.getBoundingClientRect().top + row.height / 2 + .5;
     if (previous?.link === link && previous.y === y) return;
-    const [path, dot] = trace.children;
-    const radius = 5.5;
-    path.setAttribute('d', `M .5 0 V ${y - radius} A ${radius} ${radius} 0 0 0 6 ${y} H 11.5`);
+    const [path, folio, dot] = trace.children;
+    const [cutout, number] = folio.children;
+    // The paper inset covers the stroke beneath the number, not the dot.
+    path.setAttribute('d', `M .5 0 V ${y - 8.5} A 8.5 8.5 0 0 0 9 ${y} H 14.5`);
+    cutout.setAttribute('y', y - 6.5);
+    number.setAttribute('y', y + 3.5);
     dot.setAttribute('cy', y);
     if (previous?.link === link) { previous.y = y; return; }
+    number.textContent = railNumbers.get(link.getAttribute('href'));
     if (previous) for (const animation of previous.animations) animation.cancel();
     const animations = [];
     if (!railMotion.matches && typeof path.animate === 'function') {
-      const duration = Math.max(270, Math.min(540, Math.round(160 + path.getTotalLength() * 3.6)));
+      const duration = Math.max(180, Math.min(240, Math.round(152 + y * 1.15)));
+      const travel = previous ? Math.max(-48, Math.min(48, previous.y - y)) : -4;
       animations.push(path.animate([{strokeDashoffset:1},{strokeDashoffset:0}], {duration,easing:'ease-in-out'}));
-      animations.push(dot.animate([{opacity:0,transform:'scale(0)'},{opacity:1,transform:'scale(1)'}], {delay:duration,duration:150,fill:'backwards',easing:'ease-out'}));
+      animations.push(folio.animate([{opacity:0,transform:`translateY(${travel}px)`},{opacity:1,transform:'translateY(0px)'}], {delay:duration - 60,duration:90,fill:'backwards',easing:'ease-out'}));
+      animations.push(dot.animate([{opacity:0,transform:'scale(.65)'},{opacity:1,transform:'scale(1)'}], {delay:duration,duration:80,fill:'backwards',easing:'ease-out'}));
     }
     railDraws.set(trace, {link,y,animations});
   }
@@ -2216,23 +2227,27 @@ body[data-run-mode="guided"] .setup-flow { display: none; }
     toc.classList.toggle('is-page-flow', innerWidth > 1000 && !fitsDesktop);
     const railInset = fitsDesktop ? `${Math.max(minRailInset, Math.round((innerHeight + topbarHeight - railHeight) / 2))}px` : '';
     if (toc.style.getPropertyValue('--nav-rail-inset') !== railInset) toc.style.setProperty('--nav-rail-inset',railInset);
-    const chapters = Array.from(document.querySelectorAll('#task-document > section.step'));
     const links = Array.from(document.querySelectorAll('.jump-nav a'));
     let current = state.workflow.current;
     if (state.workflow.mode === 'reference') {
       const anchorOffset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
       const readingLine = Math.max(document.querySelector('.topbar').getBoundingClientRect().height + 48, anchorOffset + 32);
-      current = chapters[0].id;
-      for (const chapter of chapters) {
+      current = railChapters[0].id;
+      for (const chapter of railChapters) {
         if (chapter.getBoundingClientRect().top <= readingLine) current = chapter.id;
       }
-      if (scrollY > 0 && scrollY + innerHeight >= document.documentElement.scrollHeight - 2) current = chapters[chapters.length - 1].id;
+      if (scrollY > 0 && scrollY + innerHeight >= document.documentElement.scrollHeight - 2) current = railChapters.at(-1).id;
     }
-    for (const chapter of chapters) chapter.classList.toggle('is-reading', chapter.id === current);
-    for (const link of links) link.getAttribute('href') === '#' + current ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current');
+    for (const chapter of railChapters) chapter.classList.toggle('is-reading', chapter.id === current);
+    for (const link of links) {
+      const active = link.getAttribute('href') === '#' + current;
+      if (active && link.getAttribute('aria-current') !== 'location') link.setAttribute('aria-current', 'location');
+      if (!active && link.hasAttribute('aria-current')) link.removeAttribute('aria-current');
+    }
     for (const group of document.querySelectorAll('.nav-group')) {
       const link = group.querySelector('a[aria-current="location"]');
-      group.dataset.active = String(Boolean(link));
+      const active = String(Boolean(link));
+      if (group.dataset.active !== active) group.dataset.active = active;
       drawRailTrace(group.querySelector('.nav-trace'), link);
     }
   }
